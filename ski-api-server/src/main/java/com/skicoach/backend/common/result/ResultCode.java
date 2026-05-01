@@ -1,6 +1,5 @@
 package com.skicoach.backend.common.result;
 
-import lombok.Data;
 import lombok.Getter;
 
 /**

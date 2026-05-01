@@ -6,16 +6,16 @@
 
 🟢 **P2.1 完成** - 项目骨架与基础设施
 🟢 **P2.2 完成** - 用户与鉴权
-- ✅ User 实体 + Mapper
-- ✅ JWT 拦截器 + Token黑名单(登出)
-- ✅ POST /api/auth/register  注册
-- ✅ POST /api/auth/login     登录
-- ✅ POST /api/auth/logout    登出
-- ✅ GET  /api/user/profile   获取个人资料
-- ✅ PUT  /api/user/profile   修改昵称
+🟢 **P2.3 完成** - 视频上传 + 文件存储
+- ✅ Video 实体 + Mapper(逻辑删除)
+- ✅ FileStorageService(本地磁盘,按用户/月份分目录)
+- ✅ MD5 秒传(同用户相同文件不重复存储)
+- ✅ POST   /api/videos/upload  上传视频
+- ✅ GET    /api/videos          视频列表(分页+状态筛选)
+- ✅ GET    /api/videos/{id}     视频详情
+- ✅ DELETE /api/videos/{id}     删除视频(逻辑删除)
 
-⚪ P2.3 - 视频上传 + 文件存储
-⚪ P2.4 - 异步任务 + AI集成
+⚪ P2.4 - 异步任务 + AI集成(对接 ski-ai-server)
 ⚪ P2.5 - 对比报告 + 管理后台
 
 ## 技术栈
