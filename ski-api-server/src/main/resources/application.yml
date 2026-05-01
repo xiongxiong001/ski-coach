@@ -1,0 +1,105 @@
+spring:
+  application:
+    name: ski-api-server
+  profiles:
+    active: dev   # 激活dev profile,生产改为 prod
+
+  # 文件上传限制
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+      enabled: true
+
+  # Jackson 配置
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+    default-property-inclusion: non_null   # 序列化时忽略 null 字段
+
+# ============================================================
+# MyBatis-Plus
+# ============================================================
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.skicoach.backend.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl   # 控制台打印SQL,生产环境改为 nologging
+  global-config:
+    banner: false   # 关闭MP启动banner
+    db-config:
+      logic-delete-field: deletedTime
+      logic-delete-value: NOW()
+      logic-not-delete-value: 'NULL'
+      id-type: auto
+
+# ============================================================
+# Tomcat 配置(支持大文件上传)
+# ============================================================
+server:
+  port: 8080
+  servlet:
+    context-path: /
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+  tomcat:
+    max-swallow-size: 200MB
+    connection-timeout: 60000
+    max-http-form-post-size: 200MB
+
+# ============================================================
+# 项目自定义配置
+# ============================================================
+ski:
+  # JWT
+  jwt:
+    user-secret: ${JWT_USER_SECRET:user_secret_change_me_to_random_at_least_32_chars}
+    admin-secret: ${JWT_ADMIN_SECRET:admin_secret_change_me_to_random_at_least_32_chars}
+    expire-hours: 168              # 7天
+
+  # 文件存储
+  storage:
+    type: local                    # local(本地磁盘) / oss(后续支持)
+    local-base-path: D:/ski-data   # 视频文件存储根目录(Windows示例)
+
+  # AI 服务(Python端)
+  ai:
+    python-base-url: http://localhost:8001    # Python AI 服务地址(注意与你实际启动端口对应)
+    analyze-timeout-ms: 600000     # 单视频分析超时:10分钟
+    compare-timeout-ms: 60000      # 对比报告超时:60秒
+    max-retry: 3                   # 失败重试次数
+
+  # 上传限制
+  upload:
+    max-duration-seconds: 180      # 视频最长3分钟
+    allowed-extensions: mp4,mov,m4v
+    max-file-size-mb: 100
+
+  # 任务队列
+  worker:
+    thread-count: 2                # 后台任务消费线程数
+
+# ============================================================
+# 日志
+# ============================================================
+logging:
+  level:
+    root: INFO
+    com.skicoach.backend: DEBUG
+    org.springframework.web: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+
+# ============================================================
+# Knife4j (API 文档)
+# ============================================================
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+    enable-version: false
+  # 生产环境关闭文档:knife4j.production=true
+  production: false

@@ -1,0 +1,46 @@
+# 生产环境配置(敏感信息从环境变量读取)
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DB:ski_coach}?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD}
+    druid:
+      initial-size: 10
+      min-idle: 10
+      max-active: 50
+      filters: stat,wall,slf4j
+      stat-view-servlet:
+        enabled: false        # 生产环境关闭Druid监控页面
+      web-stat-filter:
+        enabled: true
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: 0
+      timeout: 5000ms
+
+# 生产环境关闭MyBatis SQL日志
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
+
+# 生产环境关闭Knife4j文档
+knife4j:
+  production: true
+
+# AI服务地址(生产环境通常用容器内部网络)
+ski:
+  ai:
+    python-base-url: ${AI_SERVER_URL:http://ski-ai-server:8000}
+  storage:
+    local-base-path: ${VIDEO_STORAGE_PATH:/data/ski_videos}
+
+logging:
+  level:
+    root: WARN
+    com.skicoach.backend: INFO
