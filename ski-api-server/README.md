@@ -5,17 +5,15 @@
 ## 当前进度
 
 🟢 **P2.1 完成** - 项目骨架与基础设施
-- ✅ Maven 配置(JDK 21 + SpringBoot 3.2)
-- ✅ 数据库连接 (Druid + MySQL 8)
-- ✅ Redis + Redisson
-- ✅ MyBatis-Plus(分页、自动填充时间)
-- ✅ 统一响应包装 (ApiResult)
-- ✅ 全局异常处理
-- ✅ Knife4j API 文档
-- ✅ JWT 工具类(供后续阶段使用)
-- ✅ 健康检查接口
+🟢 **P2.2 完成** - 用户与鉴权
+- ✅ User 实体 + Mapper
+- ✅ JWT 拦截器 + Token黑名单(登出)
+- ✅ POST /api/auth/register  注册
+- ✅ POST /api/auth/login     登录
+- ✅ POST /api/auth/logout    登出
+- ✅ GET  /api/user/profile   获取个人资料
+- ✅ PUT  /api/user/profile   修改昵称
 
-⚪ P2.2 - 用户与鉴权(注册/登录/JWT拦截器)
 ⚪ P2.3 - 视频上传 + 文件存储
 ⚪ P2.4 - 异步任务 + AI集成
 ⚪ P2.5 - 对比报告 + 管理后台

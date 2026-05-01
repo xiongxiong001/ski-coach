@@ -13,6 +13,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
  * 全局异常处理器
@@ -103,6 +104,17 @@ public class GlobalExceptionHandler {
     public ApiResult<Void> handleFileSizeExceeded(MaxUploadSizeExceededException e) {
         log.warn("[文件过大] {}", e.getMessage());
         return ApiResult.error(ResultCode.FILE_TOO_LARGE);
+    }
+
+    /**
+     * 静态资源找不到(比如浏览器自动请求 favicon.ico、robots.txt 等)
+     * 直接返回404,不打ERROR日志,避免日志噪音
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ApiResult<Void> handleNoResourceFound(NoResourceFoundException e) {
+        // 静态资源不存在是正常的,降级到 DEBUG 日志(默认不打印)
+        log.debug("静态资源不存在: {}", e.getResourcePath());
+        return ApiResult.error(404, "资源不存在: " + e.getResourcePath());
     }
 
     /**
