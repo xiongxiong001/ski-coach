@@ -1,0 +1,23 @@
+# ============================================================
+# Ski Coach - 一键启动所有服务
+# ============================================================
+# 此文件将在 P5 阶段(Docker整合)正式填充。
+# 现阶段仅作为占位,各子项目独立开发。
+#
+# P5阶段会包含的服务:
+#   - mysql:        MySQL 8.0
+#   - redis:        Redis 7.0
+#   - ski-api-server:  Java主业务服务
+#   - ski-ai-server:   Python AI推理服务
+#   - ski-user-web:    用户端Web(Nginx托管)
+#   - ski-admin-web:   管理后台Web(Nginx托管)
+#   - nginx:        反向代理
+# ============================================================
+
+# version 字段已在新版 docker-compose 中废弃,这里不再使用
+
+services:
+  # 占位 - 各子项目开发完成后填充
+  placeholder:
+    image: hello-world
+    container_name: ski-coach-placeholder
