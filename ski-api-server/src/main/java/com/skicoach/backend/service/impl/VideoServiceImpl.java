@@ -13,6 +13,7 @@ import com.skicoach.backend.dto.video.VideoListQuery;
 import com.skicoach.backend.dto.video.VideoUploadResponse;
 import com.skicoach.backend.entity.Video;
 import com.skicoach.backend.mapper.VideoMapper;
+import com.skicoach.backend.service.AnalysisTaskService;
 import com.skicoach.backend.service.FileStorageService;
 import com.skicoach.backend.service.VideoService;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class VideoServiceImpl implements VideoService {
 
     private final VideoMapper videoMapper;
     private final FileStorageService fileStorageService;
+    private final AnalysisTaskService analysisTaskService;
 
     @Value("${ski.upload.allowed-extensions}")
     private String allowedExtensions;
@@ -103,9 +105,10 @@ public class VideoServiceImpl implements VideoService {
         log.info("视频入库: videoId={}, userId={}, filename={}",
                 video.getId(), userId, file.getOriginalFilename());
 
-        // P2.4 阶段会在这里触发异步分析任务
+        // 触发异步分析任务(P2.4 新增)
+        analysisTaskService.enqueueSingleAnalysis(userId, video.getId());
 
-        return buildUploadResponse(video, false, "上传成功,等待分析");
+        return buildUploadResponse(video, false, "上传成功,正在分析中...");
     }
 
     @Override

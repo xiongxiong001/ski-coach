@@ -7,15 +7,17 @@
 🟢 **P2.1 完成** - 项目骨架与基础设施
 🟢 **P2.2 完成** - 用户与鉴权
 🟢 **P2.3 完成** - 视频上传 + 文件存储
-- ✅ Video 实体 + Mapper(逻辑删除)
-- ✅ FileStorageService(本地磁盘,按用户/月份分目录)
-- ✅ MD5 秒传(同用户相同文件不重复存储)
-- ✅ POST   /api/videos/upload  上传视频
-- ✅ GET    /api/videos          视频列表(分页+状态筛选)
-- ✅ GET    /api/videos/{id}     视频详情
-- ✅ DELETE /api/videos/{id}     删除视频(逻辑删除)
+🟢 **P2.4 完成** - 异步任务 + AI集成
+- ✅ Redis 任务队列(Redisson RBlockingQueue)
+- ✅ TaskWorker 后台线程消费任务
+- ✅ PythonAiClient(OkHttp 调用 ski-ai-server)
+- ✅ SingleAnalysisHandler(单视频分析全流程)
+- ✅ 视频上传后自动触发分析
+- ✅ analysis_data 写到 videos 表(供后续对比复用)
+- ✅ GET /api/tasks/{id}        查询任务状态(供前端轮询)
+- ✅ GET /api/reports            报告列表
+- ✅ GET /api/reports/{id}       报告详情
 
-⚪ P2.4 - 异步任务 + AI集成(对接 ski-ai-server)
 ⚪ P2.5 - 对比报告 + 管理后台
 
 ## 技术栈
