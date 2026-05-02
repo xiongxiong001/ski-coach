@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.skicoach.backend.mapper.AdminStatsMapper">
+
+    <!-- ============== 用户 ============== -->
+    <select id="countTotalUsers" resultType="long">
+        SELECT COUNT(*) FROM users
+    </select>
+
+    <select id="countNewUsersInRange" resultType="long">
+        SELECT COUNT(*) FROM users
+        WHERE created_time &gt;= #{start}
+          AND created_time &lt; DATE_ADD(#{end}, INTERVAL 1 DAY)
+    </select>
+
+    <!-- ============== 视频 ============== -->
+    <select id="countActiveVideos" resultType="long">
+        SELECT COUNT(*) FROM videos WHERE deleted_time IS NULL
+    </select>
+
+    <select id="countDeletedVideos" resultType="long">
+        SELECT COUNT(*) FROM videos WHERE deleted_time IS NOT NULL
+    </select>
+
+    <select id="sumVideoFileSize" resultType="long">
+        SELECT COALESCE(SUM(file_size), 0) FROM videos WHERE deleted_time IS NULL
+    </select>
+
+    <select id="countVideosInRange" resultType="long">
+        SELECT COUNT(*) FROM videos
+        WHERE deleted_time IS NULL
+          AND created_time &gt;= #{start}
+          AND created_time &lt; DATE_ADD(#{end}, INTERVAL 1 DAY)
+    </select>
+
+    <!-- ============== 报告 ============== -->
+    <select id="countTotalReports" resultType="long">
+        SELECT (SELECT COUNT(*) FROM reports) + (SELECT COUNT(*) FROM comparison_reports)
+    </select>
+
+    <select id="countReportsInRange" resultType="long">
+        SELECT
+        (SELECT COUNT(*) FROM reports
+         WHERE created_time &gt;= #{start} AND created_time &lt; DATE_ADD(#{end}, INTERVAL 1 DAY))
+        +
+        (SELECT COUNT(*) FROM comparison_reports
+         WHERE created_time &gt;= #{start} AND created_time &lt; DATE_ADD(#{end}, INTERVAL 1 DAY))
+    </select>
+
+    <!-- ============== 任务 ============== -->
+    <select id="countRunningTasks" resultType="long">
+        SELECT COUNT(*) FROM analysis_tasks WHERE status = 'running'
+    </select>
+
+    <select id="countFailedTasks" resultType="long">
+        SELECT COUNT(*) FROM analysis_tasks WHERE status = 'failed'
+    </select>
+
+    <!-- ============== LLM 成本 ============== -->
+    <select id="sumLlmCostTotal" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(llm_cost_yuan), 0) FROM analysis_tasks WHERE status = 'success'
+    </select>
+
+    <select id="sumLlmCostInRange" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(llm_cost_yuan), 0) FROM analysis_tasks
+        WHERE status = 'success'
+          AND finish_time &gt;= #{start}
+          AND finish_time &lt; DATE_ADD(#{end}, INTERVAL 1 DAY)
+    </select>
+
+    <!-- ============== 每日统计 ============== -->
+    <!-- 不在SQL里生成日期序列(MyBatis不便实现),Java端再补全缺失日期 -->
+    <select id="selectDailyStats" resultType="com.skicoach.backend.dto.admin.DailyStatsVO">
+        SELECT
+            stat_date AS statDate,
+            COALESCE(SUM(new_users), 0)    AS newUsers,
+            COALESCE(SUM(video_count), 0)  AS videoCount,
+            COALESCE(SUM(task_success), 0) AS taskSuccess,
+            COALESCE(SUM(task_failed), 0)  AS taskFailed,
+            COALESCE(SUM(llm_cost), 0)     AS llmCost
+        FROM (
+            SELECT DATE(created_time) AS stat_date,
+                   COUNT(*) AS new_users, 0 AS video_count, 0 AS task_success, 0 AS task_failed, 0 AS llm_cost
+            FROM users
+            WHERE created_time &gt;= #{start} AND created_time &lt; DATE_ADD(#{end}, INTERVAL 1 DAY)
+            GROUP BY DATE(created_time)
+
+            UNION ALL
+
+            SELECT DATE(created_time), 0, COUNT(*), 0, 0, 0
+            FROM videos
+            WHERE deleted_time IS NULL
+              AND created_time &gt;= #{start} AND created_time &lt; DATE_ADD(#{end}, INTERVAL 1 DAY)
+            GROUP BY DATE(created_time)
+
+            UNION ALL
+
+            SELECT DATE(finish_time), 0, 0,
+                   SUM(CASE WHEN status='success' THEN 1 ELSE 0 END),
+                   SUM(CASE WHEN status='failed'  THEN 1 ELSE 0 END),
+                   COALESCE(SUM(CASE WHEN status='success' THEN llm_cost_yuan ELSE 0 END), 0)
+            FROM analysis_tasks
+            WHERE finish_time IS NOT NULL
+              AND finish_time &gt;= #{start} AND finish_time &lt; DATE_ADD(#{end}, INTERVAL 1 DAY)
+            GROUP BY DATE(finish_time)
+        ) merged
+        GROUP BY stat_date
+        ORDER BY stat_date ASC
+    </select>
+
+    <!-- ============== LLM 成本按任务类型 ============== -->
+    <select id="selectLlmCostByTaskType" resultType="com.skicoach.backend.dto.admin.LlmCostStatsVO">
+        SELECT
+            task_type AS taskType,
+            COUNT(*) AS callCount,
+            COALESCE(SUM(llm_input_tokens), 0)  AS totalInputTokens,
+            COALESCE(SUM(llm_output_tokens), 0) AS totalOutputTokens,
+            COALESCE(SUM(llm_cost_yuan), 0)     AS totalCost,
+            COALESCE(AVG(llm_cost_yuan), 0)     AS avgCost
+        FROM analysis_tasks
+        WHERE status = 'success'
+        GROUP BY task_type
+    </select>
+</mapper>

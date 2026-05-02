@@ -2,23 +2,48 @@
 
 > Ski Coach 主业务API服务,基于 JDK 21 + SpringBoot 3.2 + MyBatis-Plus 实现。
 
-## 当前进度
+## 当前进度 🎉 P2 全部完成!
 
 🟢 **P2.1 完成** - 项目骨架与基础设施
 🟢 **P2.2 完成** - 用户与鉴权
 🟢 **P2.3 完成** - 视频上传 + 文件存储
 🟢 **P2.4 完成** - 异步任务 + AI集成
-- ✅ Redis 任务队列(Redisson RBlockingQueue)
-- ✅ TaskWorker 后台线程消费任务
-- ✅ PythonAiClient(OkHttp 调用 ski-ai-server)
-- ✅ SingleAnalysisHandler(单视频分析全流程)
-- ✅ 视频上传后自动触发分析
-- ✅ analysis_data 写到 videos 表(供后续对比复用)
-- ✅ GET /api/tasks/{id}        查询任务状态(供前端轮询)
-- ✅ GET /api/reports            报告列表
-- ✅ GET /api/reports/{id}       报告详情
+🟢 **P2.5 完成** - 对比报告 + 管理后台
 
-⚪ P2.5 - 对比报告 + 管理后台
+### P2.5 详细
+**对比报告(用户端)**:
+- ✅ POST /api/comparisons          创建对比报告(异步,自动复用已有报告)
+- ✅ GET  /api/comparisons          对比报告列表
+- ✅ GET  /api/comparisons/{id}     对比报告详情
+- ✅ ComparisonHandler 复用 P2.4 的 Worker 框架,只跑LLM不再跑MediaPipe
+
+**管理后台(全部)**:
+- ✅ POST /admin/auth/login          管理员登录
+- ✅ POST /admin/auth/logout
+- ✅ GET  /admin/users                用户列表(手机号搜索/状态筛选)
+- ✅ GET  /admin/users/{id}           用户详情(含视频数/报告数)
+- ✅ PUT  /admin/users/{id}/status    启用/封禁
+- ✅ GET  /admin/tasks                任务列表
+- ✅ GET  /admin/tasks/{id}           任务详情
+- ✅ POST /admin/tasks/{id}/retry     重试失败任务
+- ✅ GET  /admin/stats/overview       总览(用户/视频/报告/成本)
+- ✅ GET  /admin/stats/daily          每日统计(默认最近7天)
+- ✅ GET  /admin/stats/llm-cost       LLM 成本按任务类型
+- ✅ GET  /admin/stats/storage        存储使用情况
+
+### 默认管理员账号
+- 用户名: `admin`
+- 密码:   `admin123`
+- 生产环境务必修改!
+
+---
+
+## 接下来
+
+✅ **Java 后端全部完成**,接下来:
+- ⚪ P3 - 用户端 Vue Web (上传视频、看报告、做对比)
+- ⚪ P4 - 管理后台 Vue Web
+- ⚪ P5 - Docker Compose 整合 + 部署文档
 
 ## 技术栈
 
