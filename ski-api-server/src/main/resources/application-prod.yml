@@ -22,9 +22,6 @@ server:
       enabled: true
 
 spring:
-  profiles:
-    active: prod
-
   # 数据源(URL/USERNAME/PASSWORD 由环境变量注入)
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
