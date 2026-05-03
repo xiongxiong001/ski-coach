@@ -2,15 +2,19 @@
 应用配置模块
 使用 pydantic-settings 从 .env 文件和环境变量加载配置
 """
+from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Optional
+
+# 相对 config.py 文件定位 .env,避免因启动目录不同导致读取失败
+_ENV_FILE = Path(__file__).parent.parent / ".env"
 
 
 class Settings(BaseSettings):
     """应用配置(从 .env 和环境变量自动加载)"""
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=str(_ENV_FILE),
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",  # 忽略未定义的环境变量

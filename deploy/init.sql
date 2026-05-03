@@ -204,7 +204,7 @@ CREATE TABLE admins (
 -- 提示: 生产环境务必修改默认密码!
 -- ================================================================
 INSERT INTO admins (username, password_hash, real_name, status)
-VALUES ('admin', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', '默认管理员', 1);
+VALUES ('admin', '$2b$10$RfvwJJ5TP2yZOQ3Zdy6AXOCqUeCLvEcMAkENYj44.TQj/terhckQm', '默认管理员', 1);
 
 
 -- ================================================================

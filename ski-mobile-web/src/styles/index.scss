@@ -1,0 +1,254 @@
+@use './variables.scss' as *;
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;  // 移除iOS点击高亮
+}
+
+html, body {
+  height: 100%;
+  font-family: $font-family-base;
+  font-size: $font-base;
+  color: $text-primary;
+  background: $bg-base;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior: none;  // 防止iOS橡皮筋
+}
+
+#app {
+  height: 100%;
+  background: $bg-base;
+}
+
+a { color: $color-primary; text-decoration: none; }
+button { -webkit-appearance: none; appearance: none; background: none; border: none; }
+
+// ====== Vant 主题覆盖(深色) ======
+:root {
+  // 主题色
+  --van-primary-color: #{$color-primary};
+  --van-success-color: #{$color-success};
+  --van-warning-color: #{$color-warning};
+  --van-danger-color: #{$color-danger};
+
+  // 背景与文字(深色主题)
+  --van-background: #{$bg-base};
+  --van-background-2: #{$bg-card};
+  --van-text-color: #{$text-primary};
+  --van-text-color-2: #{$text-regular};
+  --van-text-color-3: #{$text-secondary};
+
+  // 边框
+  --van-border-color: #{$border-light};
+
+  // 圆角
+  --van-radius-md: #{$radius-md};
+  --van-radius-lg: #{$radius-lg};
+
+  // Cell / List
+  --van-cell-background: #{$bg-card};
+  --van-cell-border-color: #{$border-light};
+  --van-cell-text-color: #{$text-primary};
+
+  // NavBar
+  --van-nav-bar-background: #{$bg-base};
+  --van-nav-bar-text-color: #{$text-primary};
+  --van-nav-bar-icon-color: #{$text-primary};
+  --van-nav-bar-title-text-color: #{$text-primary};
+  --van-nav-bar-arrow-size: 18px;
+
+  // TabBar
+  --van-tabbar-background: rgba(20, 25, 55, 0.85);
+  --van-tabbar-item-text-color: #{$text-secondary};
+  --van-tabbar-item-active-color: #{$color-primary};
+  --van-tabbar-item-active-background: transparent;
+
+  // Button
+  --van-button-default-background: #{$bg-elevated};
+  --van-button-default-color: #{$text-primary};
+
+  // Field 输入框
+  --van-field-input-text-color: #{$text-primary};
+  --van-field-placeholder-text-color: #{$text-placeholder};
+  --van-field-label-color: #{$text-regular};
+
+  // Cell Group
+  --van-cell-group-background: transparent;
+
+  // Dialog
+  --van-dialog-background: #{$bg-card};
+  --van-dialog-message-text-color: #{$text-primary};
+
+  // Toast
+  --van-toast-background: rgba(20, 25, 55, 0.95);
+  --van-toast-text-color: #{$text-primary};
+
+  // Loading
+  --van-loading-text-color: #{$text-secondary};
+
+  // Empty
+  --van-empty-description-color: #{$text-secondary};
+
+  // Tag
+  --van-tag-success-background: rgba(16, 185, 129, 0.15);
+  --van-tag-warning-background: rgba(245, 158, 11, 0.15);
+  --van-tag-danger-background: rgba(239, 68, 68, 0.15);
+  --van-tag-primary-background: rgba(59, 130, 246, 0.15);
+}
+
+// ====== 通用工具类 ======
+.flex { display: flex; }
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.flex-col { display: flex; flex-direction: column; }
+.flex-1 { flex: 1; min-width: 0; }
+.text-secondary { color: $text-secondary; }
+.text-regular { color: $text-regular; }
+.text-gradient {
+  background: $gradient-primary;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+// ====== 基础布局 ======
+.app-page {
+  min-height: 100vh;
+  padding-bottom: calc(60px + #{$safe-bottom});  // 给底部TabBar留空间
+}
+
+.page-content {
+  padding: $space-lg;
+}
+
+// ====== 玻璃态卡片 ======
+.glass-card {
+  background: $glass-bg;
+  backdrop-filter: $glass-blur;
+  -webkit-backdrop-filter: $glass-blur;
+  border: $glass-border;
+  border-radius: $radius-lg;
+  padding: $space-lg;
+}
+
+.solid-card {
+  background: $bg-card;
+  border: 1px solid $border-light;
+  border-radius: $radius-lg;
+  padding: $space-lg;
+}
+
+// ====== Markdown 渲染(深色主题适配) ======
+.markdown-content {
+  line-height: 1.8;
+  font-size: $font-md;
+  color: $text-regular;
+  word-break: break-word;
+
+  h1, h2, h3, h4 {
+    margin-top: $space-2xl;
+    margin-bottom: $space-md;
+    font-weight: 600;
+    color: $text-primary;
+  }
+
+  h1 {
+    font-size: $font-3xl;
+    background: $gradient-primary;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    padding-bottom: $space-sm;
+    border-bottom: 1px solid $border-light;
+  }
+  h2 {
+    font-size: $font-xl;
+    color: $color-cyan;
+  }
+  h3 {
+    font-size: $font-lg;
+    color: $color-primary;
+  }
+
+  p { margin-bottom: $space-md; }
+
+  ul, ol {
+    margin-bottom: $space-md;
+    padding-left: $space-2xl;
+  }
+  li { margin-bottom: $space-xs; line-height: 1.8; }
+
+  strong {
+    color: $color-cyan;
+    font-weight: 600;
+  }
+  em {
+    color: $color-pink;
+    font-style: normal;
+  }
+
+  code {
+    background: $bg-elevated;
+    color: $color-cyan;
+    padding: 2px 8px;
+    border-radius: $radius-sm;
+    font-size: 13px;
+    font-family: "SF Mono", monospace;
+  }
+
+  blockquote {
+    margin: $space-lg 0;
+    padding: $space-md $space-lg;
+    border-left: 3px solid $color-primary;
+    background: rgba(59, 130, 246, 0.08);
+    border-radius: 0 $radius-md $radius-md 0;
+    color: $text-regular;
+  }
+
+  hr {
+    margin: $space-2xl 0;
+    border: none;
+    border-top: 1px solid $border-light;
+  }
+}
+
+// ====== 动画 ======
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, $bg-card 0%, $bg-elevated 50%, $bg-card 100%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+  border-radius: $radius-md;
+}
+
+// ====== 路由切换动画 ======
+.page-enter-active, .page-leave-active {
+  transition: opacity 0.2s, transform 0.2s;
+}
+.page-enter-from { opacity: 0; transform: translateX(20px); }
+.page-leave-to { opacity: 0; transform: translateX(-20px); }

@@ -20,11 +20,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -34,6 +39,7 @@ public class VideoServiceImpl implements VideoService {
     private final VideoMapper videoMapper;
     private final FileStorageService fileStorageService;
     private final AnalysisTaskService analysisTaskService;
+    private final StringRedisTemplate stringRedisTemplate;
 
     @Value("${ski.upload.allowed-extensions}")
     private String allowedExtensions;
@@ -41,8 +47,25 @@ public class VideoServiceImpl implements VideoService {
     @Value("${ski.upload.max-file-size-mb}")
     private long maxFileSizeMB;
 
+    @Value("${ski.upload.daily-limit:10}")
+    private int dailyUploadLimit;
+
+    @Value("${ski.upload.total-limit:50}")
+    private int totalUploadLimit;
+
+    @Value("${ski.upload.rate-limit-per-minute:5}")
+    private int rateLimitPerMinute;
+
+    // Redis Key 常量
+    private static final String RATE_LIMIT_KEY_PREFIX = "video:upload:rate:";
+
     @Override
     public VideoUploadResponse upload(Long userId, MultipartFile file) {
+        // ============ 0. 上传限流检查 ============
+        checkUploadRateLimit(userId);
+        checkDailyUploadLimit(userId);
+        checkTotalUploadLimit(userId);
+
         // ============ 1. 基础校验 ============
         if (file == null || file.isEmpty()) {
             throw new BusinessException(ResultCode.PARAM_ERROR, "上传的文件为空");
@@ -170,6 +193,61 @@ public class VideoServiceImpl implements VideoService {
             throw new BusinessException(ResultCode.VIDEO_NOT_OWNED);
         }
         return video;
+    }
+
+    // -------- 限流检查方法 --------
+
+    /**
+     * 检查上传速率限制(防止短时间大量上传)
+     */
+    private void checkUploadRateLimit(Long userId) {
+        String key = RATE_LIMIT_KEY_PREFIX + userId;
+        Long count = stringRedisTemplate.opsForValue().increment(key);
+        
+        // 第一次设置时添加过期时间
+        if (count == 1) {
+            stringRedisTemplate.expire(key, 60, TimeUnit.SECONDS);
+        }
+        
+        if (count > rateLimitPerMinute) {
+            throw new BusinessException(ResultCode.RATE_LIMIT_EXCEEDED,
+                    "上传过于频繁，请稍后再试(每分钟最多" + rateLimitPerMinute + "次)");
+        }
+    }
+
+    /**
+     * 检查每日上传数量限制
+     */
+    private void checkDailyUploadLimit(Long userId) {
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfDay = today.atStartOfDay();
+        LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
+        
+        long todayCount = videoMapper.selectCount(
+                new LambdaQueryWrapper<Video>()
+                        .eq(Video::getUserId, userId)
+                        .ge(Video::getCreatedTime, startOfDay)
+                        .lt(Video::getCreatedTime, endOfDay)
+        );
+        
+        if (todayCount >= dailyUploadLimit) {
+            throw new BusinessException(ResultCode.UPLOAD_LIMIT_EXCEEDED,
+                    "今日上传次数已达上限(最多" + dailyUploadLimit + "次)");
+        }
+    }
+
+    /**
+     * 检查总视频数量限制
+     */
+    private void checkTotalUploadLimit(Long userId) {
+        long totalCount = videoMapper.selectCount(
+                new LambdaQueryWrapper<Video>().eq(Video::getUserId, userId)
+        );
+        
+        if (totalCount >= totalUploadLimit) {
+            throw new BusinessException(ResultCode.QUOTA_EXCEEDED,
+                    "视频数量已达上限(最多" + totalUploadLimit + "个)");
+        }
     }
 
     // -------- 私有工具 --------

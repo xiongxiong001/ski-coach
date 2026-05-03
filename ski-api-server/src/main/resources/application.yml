@@ -63,7 +63,7 @@ ski:
   # 文件存储
   storage:
     type: local                    # local(本地磁盘) / oss(后续支持)
-    local-base-path: D:/ski-data   # 视频文件存储根目录(Windows示例)
+    local-base-path: D:/works/ski-data   # 视频文件存储根目录(Windows示例)
 
   # AI 服务(Python端)
   ai:

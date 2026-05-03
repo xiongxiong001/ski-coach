@@ -1,0 +1,12 @@
+node_modules/
+dist/
+dist-ssr/
+.local
+.cache
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.log
+.DS_Store
+src/auto-imports.d.ts
+src/components.d.ts

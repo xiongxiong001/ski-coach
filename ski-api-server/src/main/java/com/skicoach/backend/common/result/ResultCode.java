@@ -41,6 +41,9 @@ public enum ResultCode {
     VIDEO_NOT_OWNED(4202, "视频不属于当前用户"),
     VIDEO_NOT_ANALYZED(4203, "视频还未完成分析"),
     VIDEO_DURATION_TOO_LONG(4204, "视频时长超过限制"),
+    UPLOAD_LIMIT_EXCEEDED(4205, "上传数量超过限制"),
+    QUOTA_EXCEEDED(4206, "配额已用完"),
+    RATE_LIMIT_EXCEEDED(4207, "请求过于频繁"),
 
     // 业务-报告
     REPORT_NOT_FOUND(4301, "报告不存在"),

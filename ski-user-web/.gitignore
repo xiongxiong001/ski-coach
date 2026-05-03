@@ -1,0 +1,17 @@
+node_modules/
+dist/
+dist-ssr/
+.local
+.cache
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.log
+.DS_Store
+src/auto-imports.d.ts
+src/components.d.ts

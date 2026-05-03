@@ -1,0 +1,46 @@
+# ===========================================================
+# ski-ai-server Dockerfile
+# Python 3.11 + MediaPipe + FastAPI
+# ===========================================================
+
+FROM python:3.11-slim
+
+# 时区
+ENV TZ=Asia/Shanghai \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# MediaPipe 需要的系统依赖
+# libGL 给 OpenCV 用,libglib 是常见依赖
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender1 \
+    libgomp1 \
+    ffmpeg \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# 先装依赖(利用 Docker 层缓存)
+COPY requirements.txt .
+RUN pip install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
+
+# 拷贝代码
+COPY app ./app
+
+# 视频存储目录(挂载点)
+RUN mkdir -p /data/ski-data
+
+EXPOSE 8001
+
+# 健康检查
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+  CMD curl -f http://localhost:8001/health || exit 1
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001"]

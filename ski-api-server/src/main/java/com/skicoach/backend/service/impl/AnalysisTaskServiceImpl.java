@@ -14,6 +14,8 @@ import org.redisson.api.RBlockingQueue;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -38,8 +40,7 @@ public class AnalysisTaskServiceImpl implements AnalysisTaskService {
 
         taskMapper.insert(task);
 
-        // 推送到Redis队列(事务提交后再推送可能更稳妥,这里简化处理)
-        pushToQueue(task.getId());
+        pushToQueueAfterCommit(task.getId());
         log.info("[任务入队] taskId={}, type=single, videoId={}", task.getId(), videoId);
 
         return task.getId();
@@ -57,7 +58,7 @@ public class AnalysisTaskServiceImpl implements AnalysisTaskService {
         task.setRetryCount(0);
 
         taskMapper.insert(task);
-        pushToQueue(task.getId());
+        pushToQueueAfterCommit(task.getId());
         log.info("[任务入队] taskId={}, type=comparison, prev={}, curr={}",
                 task.getId(), prevVideoId, currVideoId);
 
@@ -120,6 +121,19 @@ public class AnalysisTaskServiceImpl implements AnalysisTaskService {
     }
 
     // -------- 私有工具 --------
+
+    private void pushToQueueAfterCommit(Long taskId) {
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    pushToQueue(taskId);
+                }
+            });
+        } else {
+            pushToQueue(taskId);
+        }
+    }
 
     private void pushToQueue(Long taskId) {
         RBlockingQueue<Long> queue = redissonClient.getBlockingQueue(RedisKeyConstant.TASK_QUEUE);

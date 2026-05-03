@@ -1,0 +1,155 @@
+# ===========================================================
+# Ski Coach 完整部署
+#
+# 一键启动:
+#   docker compose up -d
+#
+# 查看日志:
+#   docker compose logs -f ski-api-server
+#
+# 停止:
+#   docker compose down
+#
+# 完全清理(含数据!危险):
+#   docker compose down -v
+# ===========================================================
+
+services:
+  # ====== MySQL ======
+  mysql:
+    image: mysql:8.0
+    container_name: ski-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ski_coach
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+      - --default-authentication-plugin=mysql_native_password
+      - --default-time-zone=+08:00
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    networks:
+      - ski-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # ====== Redis ======
+  redis:
+    image: redis:7-alpine
+    container_name: ski-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes ${REDIS_PASSWORD_ARG}
+    volumes:
+      - redis-data:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    networks:
+      - ski-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # ====== Java API 服务 ======
+  ski-api-server:
+    image: ski-api-server:latest
+    container_name: ski-api-server
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ski-ai-server:
+        condition: service_started
+    environment:
+      # Spring 配置文件
+      SPRING_PROFILES_ACTIVE: prod
+      # 数据库
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ski_coach?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      # Redis
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      # 业务配置
+      SKI_AI_PYTHON_BASE_URL: http://ski-ai-server:8001
+      SKI_STORAGE_LOCAL_BASE_PATH: /data/ski-data
+      SKI_JWT_SECRET: ${JWT_USER_SECRET}
+      SKI_JWT_ADMIN_SECRET: ${JWT_ADMIN_SECRET}
+      SKI_JWT_EXPIRE_HOURS: 168
+      SKI_WORKER_THREAD_COUNT: ${WORKER_THREAD_COUNT:-2}
+      # JVM 内存
+      JAVA_OPTS: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+    volumes:
+      # 关键!视频文件存储,Java 和 Python 共享同一目录
+      - ${VIDEO_DATA_PATH:-./data/ski-data}:/data/ski-data
+    ports:
+      - "${API_PORT:-8080}:8080"
+    networks:
+      - ski-net
+
+  # ====== Python AI 服务 ======
+  ski-ai-server:
+    image: ski-ai-server:latest
+    container_name: ski-ai-server
+    restart: unless-stopped
+    environment:
+      VIDEO_STORAGE_BASE_PATH: /data/ski-data
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
+      DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-https://api.deepseek.com/v1}
+      DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-chat}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    volumes:
+      # 关键!与 Java 共享视频目录
+      - ${VIDEO_DATA_PATH:-./data/ski-data}:/data/ski-data
+    ports:
+      - "${AI_PORT:-8001}:8001"
+    networks:
+      - ski-net
+
+  # ====== Nginx(前端 + 反代) ======
+  nginx:
+    image: nginx:alpine
+    container_name: ski-nginx
+    restart: unless-stopped
+    depends_on:
+      - ski-api-server
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      # 前端静态文件挂载(从 host 挂载,方便更新)
+      - ./web/mobile:/usr/share/nginx/html/mobile:ro
+      - ./web/admin:/usr/share/nginx/html/admin:ro
+      # 日志
+      - ./logs/nginx:/var/log/nginx
+      # HTTPS 证书(部署HTTPS时取消注释)
+      # - ./certs:/etc/nginx/certs:ro
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      # - "${HTTPS_PORT:-443}:443"
+    networks:
+      - ski-net
+
+# ====== 数据卷 ======
+volumes:
+  mysql-data:
+    driver: local
+  redis-data:
+    driver: local
+
+# ====== 网络 ======
+networks:
+  ski-net:
+    driver: bridge

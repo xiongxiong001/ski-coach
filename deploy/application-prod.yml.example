@@ -1,0 +1,130 @@
+# ============================================================
+# Spring 生产环境配置
+# 此文件应放入 ski-api-server/src/main/resources/application-prod.yml
+#
+# 关键值都通过环境变量注入(docker-compose 提供),
+# 这里只配置端口、连接池、日志等基础项
+# ============================================================
+
+server:
+  port: 8080
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 10
+    max-connections: 8192
+    accept-count: 100
+    connection-timeout: 20s
+  # 大文件上传支持
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+
+spring:
+  profiles:
+    active: prod
+
+  # 数据源(URL/USERNAME/PASSWORD 由环境变量注入)
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    druid:
+      initial-size: 5
+      min-idle: 5
+      max-active: 20
+      max-wait: 60000
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      validation-query: SELECT 1
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      pool-prepared-statements: true
+      max-pool-prepared-statement-per-connection-size: 20
+      filters: stat,wall,slf4j
+      stat-view-servlet:
+        enabled: false   # 生产环境禁用 Druid 监控页
+
+  # 文件上传
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 200MB
+      max-request-size: 200MB
+
+  # Redis(host/password 由环境变量注入)
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:redis}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      password: ${SPRING_DATA_REDIS_PASSWORD:}
+      timeout: 5000
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+          min-idle: 2
+
+# MyBatis-Plus
+mybatis-plus:
+  mapper-locations: classpath*:mapper/**/*.xml
+  type-aliases-package: com.skicoach.backend.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl   # 生产关日志
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deletedTime
+      logic-not-delete-value: "null"
+      logic-delete-value: "now()"
+
+# 业务配置
+ski:
+  ai:
+    python-base-url: ${SKI_AI_PYTHON_BASE_URL:http://ski-ai-server:8001}
+  storage:
+    local-base-path: ${SKI_STORAGE_LOCAL_BASE_PATH:/data/ski-data}
+  jwt:
+    secret: ${SKI_JWT_SECRET}
+    admin-secret: ${SKI_JWT_ADMIN_SECRET}
+    expire-hours: ${SKI_JWT_EXPIRE_HOURS:168}
+  worker:
+    thread-count: ${SKI_WORKER_THREAD_COUNT:2}
+
+# 日志
+logging:
+  level:
+    root: INFO
+    com.skicoach: INFO
+    org.springframework: WARN
+    org.apache.ibatis: WARN
+    com.baomidou.mybatisplus: WARN
+  file:
+    name: /app/logs/ski-api-server.log
+    max-size: 100MB
+    max-history: 30
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
+
+# Knife4j 接口文档:生产关闭(避免暴露接口)
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+knife4j:
+  enable: false
+  production: true
+
+# 健康检查端点(供 Docker healthcheck 用)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
