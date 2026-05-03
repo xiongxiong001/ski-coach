@@ -52,6 +52,13 @@ build_ai() {
 build_web() {
   log "🔨 构建前端静态文件..."
   mkdir -p "$DEPLOY_DIR/web"
+  
+  # 自动安装 Node.js 和 npm（如果不存在）
+  if ! command -v npm &> /dev/null; then
+	echo "[$(date +%H:%M:%S)] ⚠️  未检测到 npm，自动安装 Node.js 20..."
+	curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+	sudo apt-get install -y nodejs
+  fi
 
   # 移动端
   if [ -d "$ROOT_DIR/ski-mobile-web" ]; then
