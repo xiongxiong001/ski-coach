@@ -64,7 +64,7 @@ build_web() {
   if [ -d "$ROOT_DIR/ski-mobile-web" ]; then
     log "📦 编译 ski-mobile-web..."
     cd "$ROOT_DIR/ski-mobile-web"
-    if [ ! -d node_modules ]; then npm ci || npm install; fi
+    npm install
     npm run build
     rm -rf "$DEPLOY_DIR/web/mobile"
     cp -r dist "$DEPLOY_DIR/web/mobile"
@@ -78,7 +78,7 @@ build_web() {
   if [ -d "$ROOT_DIR/ski-admin-web" ]; then
     log "📦 编译 ski-admin-web..."
     cd "$ROOT_DIR/ski-admin-web"
-    if [ ! -d node_modules ]; then npm ci || npm install; fi
+    npm install
     npm run build
     rm -rf "$DEPLOY_DIR/web/admin"
     cp -r dist "$DEPLOY_DIR/web/admin"
