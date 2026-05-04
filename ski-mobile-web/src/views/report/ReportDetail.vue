@@ -138,7 +138,7 @@ async function handleShare() {
   padding: $space-3xl $space-lg;
   margin: $space-md $space-lg 0;
   border-radius: $radius-xl;
-  background: linear-gradient(135deg, #DBEAFE 0%, #C7D2FE 50%, #FCE7F3 100%);
+  background: linear-gradient(135deg, #E0F2FE 0%, #BAE6FD 50%, #CFFAFE 100%);
   overflow: hidden;
   color: $text-primary;
 }
@@ -163,7 +163,7 @@ async function handleShare() {
   .orb-2 {
     bottom: -40px; left: -40px;
     width: 140px; height: 140px;
-    background: radial-gradient(circle, rgba(244,114,182,0.4) 0%, transparent 60%);
+    background: radial-gradient(circle, rgba(56,189,248,0.4) 0%, transparent 60%);
   }
 }
 

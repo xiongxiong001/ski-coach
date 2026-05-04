@@ -124,12 +124,12 @@ async function handleSubmit() {
   .orb-1 {
     top: -120px; right: -100px;
     width: 320px; height: 320px;
-    background: radial-gradient(circle, #8B5CF6 0%, transparent 70%);
+    background: radial-gradient(circle, #38BDF8 0%, transparent 70%);
   }
   .orb-2 {
     bottom: -80px; left: -100px;
     width: 280px; height: 280px;
-    background: radial-gradient(circle, #3B82F6 0%, transparent 70%);
+    background: radial-gradient(circle, #0EA5E9 0%, transparent 70%);
   }
 }
 
@@ -198,8 +198,8 @@ async function handleSubmit() {
     &::placeholder { color: $text-placeholder; }
     &:focus {
       border-color: $color-primary;
-      background: rgba(59, 130, 246, 0.08);
-      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+      background: rgba(14, 143, 212, 0.08);
+      box-shadow: 0 0 0 4px rgba(14, 143, 212, 0.1);
     }
   }
 }

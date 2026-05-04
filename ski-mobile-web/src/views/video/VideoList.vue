@@ -344,11 +344,11 @@ function goDetail(v) {
   overflow: hidden;
 
   // 5 种渐变背景循环
-  &.thumb-0 { background: linear-gradient(135deg, #1e3a8a 0%, #6d28d9 100%); }
-  &.thumb-1 { background: linear-gradient(135deg, #075985 0%, #0c4a6e 100%); }
-  &.thumb-2 { background: linear-gradient(135deg, #4c1d95 0%, #7e22ce 100%); }
-  &.thumb-3 { background: linear-gradient(135deg, #134e4a 0%, #0f766e 100%); }
-  &.thumb-4 { background: linear-gradient(135deg, #831843 0%, #be185d 100%); }
+  &.thumb-0 { background: linear-gradient(135deg, #0C4A6E 0%, #0891B2 100%); }
+  &.thumb-1 { background: linear-gradient(135deg, #0369A1 0%, #0284C7 100%); }
+  &.thumb-2 { background: linear-gradient(135deg, #1E40AF 0%, #2563EB 100%); }
+  &.thumb-3 { background: linear-gradient(135deg, #155E75 0%, #0E7490 100%); }
+  &.thumb-4 { background: linear-gradient(135deg, #0F766E 0%, #14B8A6 100%); }
 
   // 添加细微噪点纹理感
   &::after {
@@ -459,7 +459,7 @@ function goDetail(v) {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: $shadow-glow, 0 8px 24px rgba(59,130,246,0.4);
+  box-shadow: $shadow-glow, 0 8px 24px rgba(14,165,233,0.4);
   z-index: 99;
   transition: transform 0.15s;
 

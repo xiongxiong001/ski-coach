@@ -65,7 +65,7 @@
       v-model:show="showEditDialog"
       title="修改昵称"
       show-cancel-button
-      confirm-button-color="#2563EB"
+      confirm-button-color="#0E8FD4"
       :before-close="handleSaveNickname"
     >
       <div class="dialog-input-wrap">
@@ -120,7 +120,7 @@ function showAbout() {
     title: 'Ski Coach',
     message: 'AI 滑雪教练\n基于姿态识别和大语言模型,\n为每个雪友提供个性化点评\n\nv1.0.0',
     confirmButtonText: '知道了',
-    confirmButtonColor: '#2563EB'
+    confirmButtonColor: '#0E8FD4'
   })
 }
 
@@ -151,7 +151,7 @@ async function handleLogout() {
 .profile-hero {
   position: relative;
   padding: calc(40px + #{$safe-top}) $space-lg $space-3xl;
-  background: linear-gradient(180deg, #DBEAFE 0%, $bg-base 100%);
+  background: linear-gradient(180deg, #E0F2FE 0%, $bg-base 100%);
   overflow: hidden;
 }
 
@@ -168,12 +168,12 @@ async function handleLogout() {
   .orb-1 {
     top: -50px; right: -50px;
     width: 200px; height: 200px;
-    background: radial-gradient(circle, rgba(139,92,246,0.4) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(56,189,248,0.4) 0%, transparent 70%);
   }
   .orb-2 {
     bottom: -50px; left: -50px;
     width: 220px; height: 220px;
-    background: radial-gradient(circle, rgba(59,130,246,0.4) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(14,165,233,0.4) 0%, transparent 70%);
   }
 }
 
@@ -216,7 +216,7 @@ async function handleLogout() {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.08);
+  background: rgba(0,0,0,0.06);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -225,7 +225,7 @@ async function handleLogout() {
   transition: all 0.15s;
 
   &:active {
-    background: rgba(255,255,255,0.15);
+    background: rgba(0,0,0,0.1);
     color: $text-primary;
   }
 }
@@ -259,7 +259,7 @@ async function handleLogout() {
   border-bottom: 1px solid $border-light;
 
   &:last-child { border-bottom: none; }
-  &:active { background: rgba(255,255,255,0.02); }
+  &:active { background: rgba(0,0,0,0.02); }
 }
 
 .menu-icon {
@@ -273,9 +273,9 @@ async function handleLogout() {
   margin-right: $space-md;
   flex-shrink: 0;
 
-  &.thumb-blue { background: linear-gradient(135deg, #3B82F6, #1e40af); }
-  &.thumb-purple { background: linear-gradient(135deg, #8B5CF6, #6d28d9); }
-  &.thumb-cyan { background: linear-gradient(135deg, #06B6D4, #0e7490); }
+  &.thumb-blue { background: linear-gradient(135deg, #0EA5E9, #0369A1); }
+  &.thumb-purple { background: linear-gradient(135deg, #38BDF8, #0284C7); }
+  &.thumb-cyan { background: linear-gradient(135deg, #0891B2, #0E7490); }
 }
 
 .menu-info {

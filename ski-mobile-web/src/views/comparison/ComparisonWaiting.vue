@@ -159,19 +159,19 @@ function stopPolling() {
   .orb-1 {
     top: 10%; right: -60px;
     width: 240px; height: 240px;
-    background: radial-gradient(circle, rgba(59,130,246,0.4) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(14,165,233,0.4) 0%, transparent 70%);
     animation-delay: 0s;
   }
   .orb-2 {
     bottom: 20%; left: -80px;
     width: 280px; height: 280px;
-    background: radial-gradient(circle, rgba(139,92,246,0.4) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(56,189,248,0.4) 0%, transparent 70%);
     animation-delay: 2s;
   }
   .orb-3 {
     top: 50%; left: 50%; transform: translate(-50%, -50%);
     width: 200px; height: 200px;
-    background: radial-gradient(circle, rgba(6,182,212,0.3) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(8,145,178,0.3) 0%, transparent 70%);
     animation-delay: 4s;
   }
 }
@@ -229,7 +229,7 @@ function stopPolling() {
     font-size: 64px;
     z-index: 2;
     transition: transform 0.5s;
-    filter: drop-shadow(0 0 24px rgba(59, 130, 246, 0.6));
+    filter: drop-shadow(0 0 24px rgba(14, 143, 212, 0.6));
   }
 }
 

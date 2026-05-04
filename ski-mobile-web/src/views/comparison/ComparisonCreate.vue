@@ -303,7 +303,7 @@ async function handleSubmit() {
 
   &.active {
     border-color: $color-primary;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+    box-shadow: 0 0 0 2px rgba(14, 143, 212, 0.15);
     animation: gentle-pulse 2s infinite;
   }
   &.filled {
@@ -312,8 +312,8 @@ async function handleSubmit() {
 }
 
 @keyframes gentle-pulse {
-  0%, 100% { box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15); }
-  50% { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25); }
+  0%, 100% { box-shadow: 0 0 0 2px rgba(14, 143, 212, 0.15); }
+  50% { box-shadow: 0 0 0 4px rgba(14, 143, 212, 0.25); }
 }
 
 .slot-thumb {
@@ -325,11 +325,11 @@ async function handleSubmit() {
   justify-content: center;
   flex-shrink: 0;
 
-  &.thumb-0 { background: linear-gradient(135deg, #1e3a8a, #6d28d9); }
-  &.thumb-1 { background: linear-gradient(135deg, #075985, #0c4a6e); }
-  &.thumb-2 { background: linear-gradient(135deg, #4c1d95, #7e22ce); }
-  &.thumb-3 { background: linear-gradient(135deg, #134e4a, #0f766e); }
-  &.thumb-4 { background: linear-gradient(135deg, #831843, #be185d); }
+  &.thumb-0 { background: linear-gradient(135deg, #0C4A6E, #0891B2); }
+  &.thumb-1 { background: linear-gradient(135deg, #0369A1, #0284C7); }
+  &.thumb-2 { background: linear-gradient(135deg, #1E40AF, #2563EB); }
+  &.thumb-3 { background: linear-gradient(135deg, #155E75, #0E7490); }
+  &.thumb-4 { background: linear-gradient(135deg, #0F766E, #14B8A6); }
 }
 
 .slot-icon { font-size: 28px; }
@@ -445,8 +445,8 @@ async function handleSubmit() {
 
   &.selected {
     border-color: $color-primary;
-    background: rgba(59, 130, 246, 0.08);
-    box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.3);
+    background: rgba(14, 143, 212, 0.08);
+    box-shadow: 0 0 0 1px rgba(14, 143, 212, 0.3);
   }
 }
 
@@ -460,11 +460,11 @@ async function handleSubmit() {
   flex-shrink: 0;
   position: relative;
 
-  &.thumb-0 { background: linear-gradient(135deg, #1e3a8a, #6d28d9); }
-  &.thumb-1 { background: linear-gradient(135deg, #075985, #0c4a6e); }
-  &.thumb-2 { background: linear-gradient(135deg, #4c1d95, #7e22ce); }
-  &.thumb-3 { background: linear-gradient(135deg, #134e4a, #0f766e); }
-  &.thumb-4 { background: linear-gradient(135deg, #831843, #be185d); }
+  &.thumb-0 { background: linear-gradient(135deg, #0C4A6E, #0891B2); }
+  &.thumb-1 { background: linear-gradient(135deg, #0369A1, #0284C7); }
+  &.thumb-2 { background: linear-gradient(135deg, #1E40AF, #2563EB); }
+  &.thumb-3 { background: linear-gradient(135deg, #155E75, #0E7490); }
+  &.thumb-4 { background: linear-gradient(135deg, #0F766E, #14B8A6); }
 }
 
 .thumb-icon { font-size: 24px; }
@@ -515,11 +515,11 @@ async function handleSubmit() {
   flex-shrink: 0;
 
   &.role-prev {
-    background: rgba(6, 182, 212, 0.15);
+    background: rgba(8, 145, 178, 0.15);
     color: $color-cyan;
   }
   &.role-curr {
-    background: rgba(139, 92, 246, 0.15);
+    background: rgba(56, 189, 248, 0.15);
     color: $color-purple;
   }
 }
@@ -558,7 +558,7 @@ async function handleSubmit() {
   bottom: 0;
   padding: $space-md $space-lg;
   padding-bottom: calc(#{$space-md} + #{$safe-bottom});
-  background: linear-gradient(180deg, rgba(248, 250, 252, 0) 0%, rgba(248, 250, 252, 0.95) 30%);
+  background: linear-gradient(180deg, rgba(242, 246, 250, 0) 0%, rgba(242, 246, 250, 0.95) 30%);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   pointer-events: none;

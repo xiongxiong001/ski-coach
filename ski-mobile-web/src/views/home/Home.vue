@@ -168,7 +168,7 @@ onMounted(async () => {
   position: relative;
   padding: calc(20px + #{$safe-top}) $space-lg $space-3xl;
   overflow: hidden;
-  background: linear-gradient(180deg, #DBEAFE 0%, $bg-base 100%);
+  background: linear-gradient(180deg, #E0F2FE 0%, $bg-base 100%);
 }
 
 .hero-bg {
@@ -185,12 +185,12 @@ onMounted(async () => {
   .orb-1 {
     top: -60px; right: -40px;
     width: 200px; height: 200px;
-    background: radial-gradient(circle, rgba(139,92,246,0.5) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(56,189,248,0.5) 0%, transparent 70%);
   }
   .orb-2 {
     top: 40px; left: -60px;
     width: 180px; height: 180px;
-    background: radial-gradient(circle, rgba(59,130,246,0.4) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(14,165,233,0.4) 0%, transparent 70%);
   }
 }
 
@@ -243,7 +243,7 @@ onMounted(async () => {
   justify-content: space-between;
   color: white;
   cursor: pointer;
-  box-shadow: $shadow-glow, 0 8px 24px rgba(59,130,246,0.3);
+  box-shadow: $shadow-glow, 0 8px 24px rgba(14,165,233,0.3);
   transition: transform 0.15s;
   position: relative;
   overflow: hidden;

@@ -288,11 +288,11 @@ async function handleDelete() {
   overflow: hidden;
   margin-bottom: $space-lg;
 
-  &.thumb-0 { background: linear-gradient(135deg, #1e3a8a 0%, #6d28d9 100%); }
-  &.thumb-1 { background: linear-gradient(135deg, #075985 0%, #0c4a6e 100%); }
-  &.thumb-2 { background: linear-gradient(135deg, #4c1d95 0%, #7e22ce 100%); }
-  &.thumb-3 { background: linear-gradient(135deg, #134e4a 0%, #0f766e 100%); }
-  &.thumb-4 { background: linear-gradient(135deg, #831843 0%, #be185d 100%); }
+  &.thumb-0 { background: linear-gradient(135deg, #0C4A6E 0%, #0891B2 100%); }
+  &.thumb-1 { background: linear-gradient(135deg, #0369A1 0%, #0284C7 100%); }
+  &.thumb-2 { background: linear-gradient(135deg, #1E40AF 0%, #2563EB 100%); }
+  &.thumb-3 { background: linear-gradient(135deg, #155E75 0%, #0E7490 100%); }
+  &.thumb-4 { background: linear-gradient(135deg, #0F766E 0%, #14B8A6 100%); }
 
   &::after {
     content: '';
@@ -387,7 +387,7 @@ async function handleDelete() {
     position: absolute;
     top: -50%; left: -50%;
     width: 200%; height: 200%;
-    background: radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 50%);
+    background: radial-gradient(circle, rgba(14,143,212,0.08) 0%, transparent 50%);
     animation: rotate-bg 8s linear infinite;
   }
 }
@@ -555,11 +555,11 @@ async function handleDelete() {
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at top right, rgba(59,130,246,0.1), transparent 60%);
+    background: radial-gradient(circle at top right, rgba(14,143,212,0.1), transparent 60%);
     pointer-events: none;
   }
   &.turn-right::before {
-    background: radial-gradient(circle at top right, rgba(139,92,246,0.1), transparent 60%);
+    background: radial-gradient(circle at top right, rgba(56,189,248,0.1), transparent 60%);
   }
 
   .turn-icon {

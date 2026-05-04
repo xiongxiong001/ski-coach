@@ -174,7 +174,7 @@ async function loadMore() {
 .card-hero {
   position: relative;
   padding: $space-md $space-lg;
-  background: linear-gradient(135deg, #DBEAFE 0%, #C7D2FE 50%, #FCE7F3 100%);
+  background: linear-gradient(135deg, #E0F2FE 0%, #BAE6FD 50%, #CFFAFE 100%);
   display: flex;
   align-items: center;
   gap: $space-md;
@@ -279,10 +279,10 @@ async function loadMore() {
     border-radius: 6px 6px 0 0;
     animation: bar-grow 2s ease infinite;
   }
-  .bar-1 { height: 40%; background: linear-gradient(180deg, #06B6D4, #3B82F6); animation-delay: 0s; }
-  .bar-2 { height: 70%; background: linear-gradient(180deg, #3B82F6, #8B5CF6); animation-delay: 0.2s; }
-  .bar-3 { height: 55%; background: linear-gradient(180deg, #8B5CF6, #F472B6); animation-delay: 0.4s; }
-  .bar-4 { height: 85%; background: linear-gradient(180deg, #F472B6, #EF4444); animation-delay: 0.6s; }
+  .bar-1 { height: 40%; background: linear-gradient(180deg, #0891B2, #0EA5E9); animation-delay: 0s; }
+  .bar-2 { height: 70%; background: linear-gradient(180deg, #0EA5E9, #38BDF8); animation-delay: 0.2s; }
+  .bar-3 { height: 55%; background: linear-gradient(180deg, #38BDF8, #F472B6); animation-delay: 0.4s; }
+  .bar-4 { height: 85%; background: linear-gradient(180deg, #0EA5E9, #0891B2); animation-delay: 0.6s; }
 }
 
 @keyframes bar-grow {
@@ -329,7 +329,7 @@ async function loadMore() {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: $shadow-glow, 0 8px 24px rgba(59,130,246,0.4);
+  box-shadow: $shadow-glow, 0 8px 24px rgba(14,165,233,0.4);
   z-index: 99;
   transition: transform 0.15s;
 

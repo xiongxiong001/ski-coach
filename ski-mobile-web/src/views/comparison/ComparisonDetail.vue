@@ -205,7 +205,7 @@ async function handleShare() {
   margin: $space-md $space-lg 0;
   padding: $space-2xl $space-lg;
   border-radius: $radius-xl;
-  background: linear-gradient(135deg, #DBEAFE 0%, #C7D2FE 50%, #FCE7F3 100%);
+  background: linear-gradient(135deg, #E0F2FE 0%, #BAE6FD 50%, #CFFAFE 100%);
   overflow: hidden;
   color: $text-primary;
 }
@@ -230,7 +230,7 @@ async function handleShare() {
   .orb-2 {
     bottom: -40px; left: -40px;
     width: 160px; height: 160px;
-    background: radial-gradient(circle, rgba(244,114,182,0.5), transparent 60%);
+    background: radial-gradient(circle, rgba(56,189,248,0.5), transparent 60%);
   }
 }
 
@@ -313,7 +313,7 @@ async function handleShare() {
 .video-tag {
   display: inline-block;
   padding: 2px 8px;
-  background: rgba(6, 182, 212, 0.15);
+  background: rgba(8, 145, 178, 0.15);
   color: $color-cyan;
   border-radius: $radius-sm;
   font-size: 10px;
@@ -322,7 +322,7 @@ async function handleShare() {
   align-self: center;
 
   &.tag-curr {
-    background: rgba(139, 92, 246, 0.15);
+    background: rgba(56, 189, 248, 0.15);
     color: $color-purple;
   }
 }
@@ -336,11 +336,11 @@ async function handleShare() {
   justify-content: center;
   margin-bottom: $space-sm;
 
-  &.thumb-0 { background: linear-gradient(135deg, #1e3a8a, #6d28d9); }
-  &.thumb-1 { background: linear-gradient(135deg, #075985, #0c4a6e); }
-  &.thumb-2 { background: linear-gradient(135deg, #4c1d95, #7e22ce); }
-  &.thumb-3 { background: linear-gradient(135deg, #134e4a, #0f766e); }
-  &.thumb-4 { background: linear-gradient(135deg, #831843, #be185d); }
+  &.thumb-0 { background: linear-gradient(135deg, #0C4A6E, #0891B2); }
+  &.thumb-1 { background: linear-gradient(135deg, #0369A1, #0284C7); }
+  &.thumb-2 { background: linear-gradient(135deg, #1E40AF, #2563EB); }
+  &.thumb-3 { background: linear-gradient(135deg, #155E75, #0E7490); }
+  &.thumb-4 { background: linear-gradient(135deg, #0F766E, #14B8A6); }
 }
 
 .thumb-icon { font-size: 32px; }

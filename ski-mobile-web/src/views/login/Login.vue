@@ -13,12 +13,12 @@
           <svg viewBox="0 0 64 64" width="56" height="56">
             <defs>
               <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#2563EB" />
-                <stop offset="100%" stop-color="#8B5CF6" />
+                <stop offset="0%" stop-color="#0E8FD4" />
+                <stop offset="100%" stop-color="#06B6D4" />
               </linearGradient>
             </defs>
             <path d="M32 8 L48 40 L40 40 L32 28 L24 40 L16 40 Z" fill="url(#logoGrad)" />
-            <circle cx="32" cy="48" r="4" fill="#06B6D4" />
+            <circle cx="32" cy="48" r="4" fill="#0891B2" />
           </svg>
         </div>
         <h1 class="brand-title">Ski Coach</h1>
@@ -238,17 +238,17 @@ async function handlePasswordLogin() {
   .orb-1 {
     top: -100px; right: -80px;
     width: 280px; height: 280px;
-    background: radial-gradient(circle, #3B82F6 0%, transparent 70%);
+    background: radial-gradient(circle, #0EA5E9 0%, transparent 70%);
   }
   .orb-2 {
     bottom: -60px; left: -100px;
     width: 320px; height: 320px;
-    background: radial-gradient(circle, #8B5CF6 0%, transparent 70%);
+    background: radial-gradient(circle, #38BDF8 0%, transparent 70%);
   }
   .orb-3 {
     top: 30%; left: 50%; transform: translateX(-50%);
     width: 200px; height: 200px;
-    background: radial-gradient(circle, #06B6D4 0%, transparent 70%);
+    background: radial-gradient(circle, #0891B2 0%, transparent 70%);
     opacity: 0.3;
   }
 }
@@ -356,8 +356,8 @@ async function handlePasswordLogin() {
     &::placeholder { color: $text-placeholder; }
     &:focus {
       border-color: $color-primary;
-      background: rgba(59, 130, 246, 0.08);
-      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+      background: rgba(14, 143, 212, 0.08);
+      box-shadow: 0 0 0 4px rgba(14, 143, 212, 0.1);
     }
   }
 }

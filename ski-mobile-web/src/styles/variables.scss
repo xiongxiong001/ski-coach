@@ -1,24 +1,24 @@
 // ============================================================
-// Ski Coach Mobile - 设计系统 · 方案A: 冰雪白
-// 风格: 清冽干净 · 白色基底 + 蓝紫渐变
+// Ski Coach Mobile - 设计系统 · 方案B: 冰川蓝
+// 风格: 柔和偏冷 · 冰蓝基底 + 蓝青渐变
 // ============================================================
 
 // ====== 主色板 ======
-$bg-base:     #F8FAFC;     // 冰雪白底
+$bg-base:     #F2F6FA;     // 冰川蓝底(冷调)
 $bg-card:     #FFFFFF;     // 纯白卡片
-$bg-elevated: #F1F5F9;     // 抬升面板
-$bg-divider:  #E2E8F0;     // 分割线
+$bg-elevated: #EBF1F7;     // 抬升面板(冷调)
+$bg-divider:  #DDE6F0;     // 分割线(冷调)
 
-$color-primary: #2563EB;   // 深蓝
-$color-purple:  #8B5CF6;   // 极光紫
-$color-cyan:    #06B6D4;   // 冰川青
-$color-pink:    #F472B6;   // 暖粉(报告高亮)
+$color-primary: #0E8FD4;   // 冰川蓝
+$color-purple:  #5B8DEF;   // 冰湖蓝(替代紫色)
+$color-cyan:    #0891B2;   // 深青
+$color-pink:    #F472B6;   // 暖粉(保留暖色对比)
 
 // 状态色
-$color-success: #10B981;
+$color-success: #059669;
 $color-warning: #F59E0B;
 $color-danger:  #EF4444;
-$color-info:    #6B7280;
+$color-info:    #64748B;
 
 // 文字
 $text-primary:     #1E293B;
@@ -32,10 +32,10 @@ $border-light: rgba(0, 0, 0, 0.06);
 $border-base:  rgba(0, 0, 0, 0.10);
 
 // ====== 渐变 ======
-$gradient-primary: linear-gradient(135deg, #2563EB 0%, #8B5CF6 100%);
-$gradient-cyan:    linear-gradient(135deg, #06B6D4 0%, #2563EB 100%);
-$gradient-warm:    linear-gradient(135deg, #F472B6 0%, #8B5CF6 100%);
-$gradient-hero:    linear-gradient(135deg, #1E40AF 0%, #6366F1 50%, #8B5CF6 100%);
+$gradient-primary: linear-gradient(135deg, #0E8FD4 0%, #06B6D4 100%);
+$gradient-cyan:    linear-gradient(135deg, #0891B2 0%, #0E8FD4 100%);
+$gradient-warm:    linear-gradient(135deg, #F472B6 0%, #5B8DEF 100%);
+$gradient-hero:    linear-gradient(135deg, #0369A1 0%, #0891B2 50%, #06B6D4 100%);
 
 // 玻璃态
 $glass-bg:     rgba(255, 255, 255, 0.8);
@@ -50,12 +50,12 @@ $radius-xl: 20px;
 $radius-2xl: 24px;
 $radius-full: 999px;
 
-// ====== 阴影 ======
+// ====== 阴影(蓝色调) ======
 $shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
 $shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
 $shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
-$shadow-glow: 0 0 24px rgba(37, 99, 235, 0.25);
-$shadow-glow-purple: 0 0 24px rgba(139, 92, 246, 0.25);
+$shadow-glow: 0 0 24px rgba(14, 143, 212, 0.25);
+$shadow-glow-purple: 0 0 24px rgba(91, 141, 239, 0.25);
 
 // ====== 间距 ======
 $space-xxs: 2px;
