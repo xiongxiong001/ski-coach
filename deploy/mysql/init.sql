@@ -6,6 +6,11 @@
 -- 默认管理员: admin / admin123
 -- ================================================================
 
+-- 设置客户端连接字符集，避免中文乱码
+SET NAMES utf8mb4;
+SET CHARACTER SET utf8mb4;
+SET collation_connection = 'utf8mb4_0900_ai_ci';
+
 CREATE DATABASE IF NOT EXISTS ski_coach
     DEFAULT CHARACTER SET utf8mb4
     DEFAULT COLLATE utf8mb4_0900_ai_ci;
