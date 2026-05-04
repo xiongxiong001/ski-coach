@@ -49,7 +49,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api/auth/register",
                         "/api/auth/login",
                         "/api/auth/send-sms-code",
-                        "/api/auth/sms-login"
+                        "/api/auth/sms-login",
+                        "/api/videos/*/stream"   // 视频流通过 ?token= 参数鉴权
                 );
 
         // 管理端 JWT 拦截器

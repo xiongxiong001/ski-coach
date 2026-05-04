@@ -16,6 +16,9 @@ public class ReportDetailVO {
     @Schema(description = "关联的视频ID")
     private Long videoId;
 
+    @Schema(description = "关联的视频文件名")
+    private String videoFilename;
+
     @Schema(description = "中文教练报告(Markdown)")
     private String reportMarkdown;
 

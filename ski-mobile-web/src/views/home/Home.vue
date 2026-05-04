@@ -81,7 +81,7 @@
             <div class="report-icon">📄</div>
           </div>
           <div class="report-info">
-            <div class="report-title">AI 教练点评</div>
+            <div class="report-title">{{ r.videoFilename || 'AI 教练点评' }}</div>
             <div class="report-time">{{ formatDate(r.createdTime) }}</div>
           </div>
           <div class="report-arrow">›</div>

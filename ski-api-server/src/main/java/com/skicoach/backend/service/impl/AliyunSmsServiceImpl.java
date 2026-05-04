@@ -12,12 +12,17 @@ import com.aliyuncs.profile.DefaultProfile;
 import com.skicoach.backend.common.constant.RedisKeyConstant;
 import com.skicoach.backend.common.exception.BusinessException;
 import com.skicoach.backend.common.result.ResultCode;
+import com.skicoach.backend.entity.SmsSendRecord;
+import com.skicoach.backend.mapper.SmsSendRecordMapper;
 import com.skicoach.backend.service.SmsService;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -30,6 +35,7 @@ import java.util.concurrent.TimeUnit;
 public class AliyunSmsServiceImpl implements SmsService {
 
     private final StringRedisTemplate stringRedisTemplate;
+    private final SmsSendRecordMapper smsSendRecordMapper;
 
     @Value("${ski.sms.access-key-id:}")
     private String accessKeyId;
@@ -43,6 +49,9 @@ public class AliyunSmsServiceImpl implements SmsService {
     @Value("${ski.sms.template-code:}")
     private String templateCode;
 
+    @Value("${ski.sms.send-enabled:true}")
+    private boolean sendEnabled;
+
     private IAcsClient client;
 
     private static final int CODE_LENGTH = 6;
@@ -51,12 +60,17 @@ public class AliyunSmsServiceImpl implements SmsService {
     private static final int DAILY_LIMIT = 10;
     private static final int MAX_RETRY_COUNT = 5;
 
-    public AliyunSmsServiceImpl(StringRedisTemplate stringRedisTemplate) {
+    public AliyunSmsServiceImpl(StringRedisTemplate stringRedisTemplate, SmsSendRecordMapper smsSendRecordMapper) {
         this.stringRedisTemplate = stringRedisTemplate;
+        this.smsSendRecordMapper = smsSendRecordMapper;
     }
 
     @PostConstruct
     public void init() {
+        if (!sendEnabled) {
+            log.info("短信发送已关闭(ski.sms.send-enabled=false),验证码将仅存入Redis不真实发送");
+            return;
+        }
         if (accessKeyId.isEmpty() || accessKeySecret.isEmpty()) {
             log.warn("阿里云号码认证 AccessKey 未配置,短信服务将不可用");
             return;
@@ -66,11 +80,7 @@ public class AliyunSmsServiceImpl implements SmsService {
     }
 
     @Override
-    public void sendCode(String phone) {
-        if (client == null) {
-            throw new BusinessException(ResultCode.SMS_SEND_FAILED, "短信服务未配置");
-        }
-
+    public void sendCode(String phone, String smsType) {
         // 1. 检查60秒发送间隔
         String limitKey = RedisKeyConstant.SMS_SEND_LIMIT + phone;
         Boolean hasLimit = stringRedisTemplate.hasKey(limitKey);
@@ -89,8 +99,22 @@ public class AliyunSmsServiceImpl implements SmsService {
         String code = String.format("%0" + CODE_LENGTH + "d",
                 ThreadLocalRandom.current().nextInt(0, 1_000_000));
 
-        // 4. 调用阿里云发送验证码
-        doSendVerifyCode(phone, code);
+        String ip = getClientIp();
+
+        if (!sendEnabled || client == null) {
+            // 开发环境/未配置: 不真实发送,仅存入Redis和记录
+            log.info("短信发送跳过(dev模式): phone={}, code={}", phone, code);
+            saveRecord(phone, code, smsType, 0, null, ip);
+        } else {
+            // 4. 调用阿里云发送验证码
+            try {
+                doSendVerifyCode(phone, code);
+                saveRecord(phone, code, smsType, 1, null, ip);
+            } catch (BusinessException e) {
+                saveRecord(phone, code, smsType, 2, e.getMessage(), ip);
+                throw e;
+            }
+        }
 
         // 5. 存储验证码到Redis,TTL=5分钟
         String codeKey = RedisKeyConstant.SMS_CODE + phone;
@@ -157,6 +181,39 @@ public class AliyunSmsServiceImpl implements SmsService {
             log.error("短信发送失败: phone={}, error={}", maskPhone(phone), e.getMessage());
             throw new BusinessException(ResultCode.SMS_SEND_FAILED, "短信发送失败");
         }
+    }
+
+    private void saveRecord(String phone, String code, String smsType,
+                             int sendStatus, String errorMessage, String ip) {
+        SmsSendRecord record = new SmsSendRecord();
+        record.setPhone(phone);
+        record.setCode(code);
+        record.setSmsType(smsType);
+        record.setProvider("aliyun");
+        record.setSendStatus(sendStatus);
+        record.setErrorMessage(errorMessage);
+        record.setIpAddress(ip);
+        smsSendRecordMapper.insert(record);
+    }
+
+    private String getClientIp() {
+        try {
+            ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            if (attrs != null) {
+                HttpServletRequest request = attrs.getRequest();
+                String ip = request.getHeader("X-Forwarded-For");
+                if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+                    ip = request.getHeader("X-Real-IP");
+                }
+                if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+                    ip = request.getRemoteAddr();
+                }
+                return ip;
+            }
+        } catch (Exception e) {
+            log.debug("获取客户端IP失败: {}", e.getMessage());
+        }
+        return "unknown";
     }
 
     private String maskPhone(String phone) {

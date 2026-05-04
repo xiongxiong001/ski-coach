@@ -58,7 +58,7 @@
 
       <!-- 视频对比卡片 -->
       <div v-if="prevVideo && currVideo" class="videos-row">
-        <div class="video-card">
+        <div class="video-card" @click="router.push(`/videos/${prevVideo.id}`)">
           <div class="video-tag">上次</div>
           <div class="video-thumb" :class="`thumb-${prevVideo.id % 5}`">
             <div class="thumb-icon">🎿</div>
@@ -66,10 +66,6 @@
           <div class="video-info">
             <div class="video-name">{{ prevVideo.originalFilename }}</div>
             <div class="video-meta">{{ formatDate(prevVideo.createdTime) }}</div>
-            <div class="video-stats">
-              <span class="stat-key">检测率</span>
-              <span class="stat-val">{{ formatPercent(prevVideo.detectionRate) }}</span>
-            </div>
           </div>
         </div>
 
@@ -79,7 +75,7 @@
           <div class="vs-line"></div>
         </div>
 
-        <div class="video-card">
+        <div class="video-card" @click="router.push(`/videos/${currVideo.id}`)">
           <div class="video-tag tag-curr">本次</div>
           <div class="video-thumb" :class="`thumb-${currVideo.id % 5}`">
             <div class="thumb-icon">🎿</div>
@@ -87,10 +83,6 @@
           <div class="video-info">
             <div class="video-name">{{ currVideo.originalFilename }}</div>
             <div class="video-meta">{{ formatDate(currVideo.createdTime) }}</div>
-            <div class="video-stats">
-              <span class="stat-key">检测率</span>
-              <span class="stat-val">{{ formatPercent(currVideo.detectionRate) }}</span>
-            </div>
           </div>
         </div>
       </div>
@@ -127,7 +119,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { showSuccessToast, showFailToast } from 'vant'
 import { getComparison } from '@/api/comparison'
 import { getVideo } from '@/api/video'
-import { formatDate, formatPercent } from '@/utils/format'
+import { formatDate } from '@/utils/format'
 import MarkdownView from '@/components/MarkdownView.vue'
 
 const route = useRoute()
@@ -308,6 +300,18 @@ async function handleShare() {
   position: relative;
   display: flex;
   flex-direction: column;
+  cursor: pointer;
+  border-radius: $radius-md;
+  padding: $space-sm;
+  background: $bg-elevated;
+  border: 1.5px solid $border-light;
+  transition: all 0.15s;
+
+  &:active {
+    transform: scale(0.96);
+    border-color: $color-primary;
+    box-shadow: 0 0 0 3px rgba(14, 143, 212, 0.15);
+  }
 }
 
 .video-tag {
@@ -361,24 +365,6 @@ async function handleShare() {
   font-size: 10px;
   color: $text-secondary;
   margin-bottom: $space-sm;
-}
-
-.video-stats {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  padding-top: $space-sm;
-  border-top: 1px dashed $border-light;
-
-  .stat-key {
-    font-size: 10px;
-    color: $text-secondary;
-  }
-  .stat-val {
-    font-size: $font-sm;
-    font-weight: 600;
-    color: $color-cyan;
-  }
 }
 
 .vs-divider {

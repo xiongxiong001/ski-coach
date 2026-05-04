@@ -67,7 +67,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void sendSmsCode(String phone) {
-        smsService.sendCode(phone);
+        smsService.sendCode(phone, "register_login");
     }
 
     @Override

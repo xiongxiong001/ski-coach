@@ -23,10 +23,20 @@
     </div>
 
     <div v-else-if="video" class="content">
-      <!-- 视频缩略图区(仿播放卡片) -->
-      <div class="thumb-card" :class="`thumb-${gradientId}`">
-        <div class="thumb-icon">🎿</div>
-        <div class="thumb-overlay">
+      <!-- 视频播放器 -->
+      <div class="video-player-wrap">
+        <video
+          ref="videoRef"
+          class="video-player"
+          :src="`/api/videos/${video.id}/stream?token=${userStore.token}`"
+          controls
+          preload="metadata"
+          playsinline
+          webkit-playsinline
+        >
+          您的浏览器不支持视频播放
+        </video>
+        <div class="video-overlay">
           <div class="status-badge" :class="`status-${video.analysisStatus}`">
             <span class="status-dot"></span>
             {{ VIDEO_STATUS[video.analysisStatus]?.text }}
@@ -139,6 +149,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { showSuccessToast, showFailToast, showConfirmDialog } from 'vant'
+import { useUserStore } from '@/stores/user'
 import { getVideo, deleteVideo } from '@/api/video'
 import { listReports } from '@/api/report'
 import { VIDEO_STATUS, TASK_POLL_INTERVAL } from '@/utils/constants'
@@ -146,13 +157,13 @@ import { formatFileSize, formatDate, formatDuration, formatPercent } from '@/uti
 
 const route = useRoute()
 const router = useRouter()
+const userStore = useUserStore()
 
 const video = ref(null)
+const videoRef = ref(null)
 const loading = ref(false)
 const pollTimer = ref(null)
 const dotIndex = ref(0)
-
-const gradientId = computed(() => video.value ? video.value.id % 5 : 0)
 
 const detectionPercent = computed(() => {
   if (!video.value?.detectionRate) return 0
@@ -277,37 +288,24 @@ async function handleDelete() {
   padding: $space-md $space-lg;
 }
 
-// ====== 视频缩略图卡片 ======
-.thumb-card {
+// ====== 视频播放器 ======
+.video-player-wrap {
   position: relative;
-  aspect-ratio: 16/9;
-  border-radius: $radius-xl;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
   margin-bottom: $space-lg;
-
-  &.thumb-0 { background: linear-gradient(135deg, #1e3a8a 0%, #6d28d9 100%); }
-  &.thumb-1 { background: linear-gradient(135deg, #075985 0%, #0c4a6e 100%); }
-  &.thumb-2 { background: linear-gradient(135deg, #4c1d95 0%, #7e22ce 100%); }
-  &.thumb-3 { background: linear-gradient(135deg, #134e4a 0%, #0f766e 100%); }
-  &.thumb-4 { background: linear-gradient(135deg, #831843 0%, #be185d 100%); }
-
-  &::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.12) 0%, transparent 60%);
-  }
+  border-radius: $radius-xl;
+  overflow: hidden;
+  background: #000;
 }
 
-.thumb-icon {
-  font-size: 80px;
-  filter: drop-shadow(0 8px 24px rgba(0,0,0,0.3));
+.video-player {
+  display: block;
+  width: 100%;
+  max-height: 50vh;
+  object-fit: contain;
+  outline: none;
 }
 
-.thumb-overlay {
+.video-overlay {
   position: absolute;
   top: $space-md;
   left: $space-md;

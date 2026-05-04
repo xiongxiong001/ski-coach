@@ -7,7 +7,9 @@ import com.skicoach.backend.common.result.PageResult;
 import com.skicoach.backend.common.result.ResultCode;
 import com.skicoach.backend.dto.report.ReportDetailVO;
 import com.skicoach.backend.entity.Report;
+import com.skicoach.backend.entity.Video;
 import com.skicoach.backend.mapper.ReportMapper;
+import com.skicoach.backend.mapper.VideoMapper;
 import com.skicoach.backend.service.ReportService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +17,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -23,6 +28,7 @@ import java.util.List;
 public class ReportServiceImpl implements ReportService {
 
     private final ReportMapper reportMapper;
+    private final VideoMapper videoMapper;
 
     @Override
     public Long createReport(Long taskId, Long videoId, Long userId, String reportMarkdown,
@@ -62,9 +68,17 @@ public class ReportServiceImpl implements ReportService {
                         .eq(Report::getUserId, userId)
                         .orderByDesc(Report::getCreatedTime));
 
+        // 批量加载视频文件名(避免 N+1)
+        List<Long> videoIds = result.getRecords().stream()
+                .map(Report::getVideoId).distinct().toList();
+        Map<Long, String> filenameMap = videoIds.isEmpty() ? Collections.emptyMap()
+                : videoMapper.selectBatchIds(videoIds).stream()
+                        .collect(Collectors.toMap(Video::getId, Video::getOriginalFilename, (a, b) -> a));
+
         List<ReportDetailVO> vos = result.getRecords().stream().map(r -> {
             ReportDetailVO vo = new ReportDetailVO();
             BeanUtils.copyProperties(r, vo);
+            vo.setVideoFilename(filenameMap.get(r.getVideoId()));
             return vo;
         }).toList();
 

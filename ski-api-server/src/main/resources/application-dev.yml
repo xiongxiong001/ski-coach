@@ -53,3 +53,4 @@ ski:
   sms:
     sign-name: "滑雪教练测试"
     template-code: "SMS_12345678"
+    send-enabled: false   # 开发环境不真实发送短信,节省资源
