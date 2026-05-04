@@ -45,6 +45,12 @@ public enum ResultCode {
     QUOTA_EXCEEDED(4206, "配额已用完"),
     RATE_LIMIT_EXCEEDED(4207, "请求过于频繁"),
 
+    // 业务-短信
+    SMS_CODE_ERROR(4105, "验证码错误"),
+    SMS_CODE_EXPIRED(4106, "验证码已过期"),
+    SMS_SEND_TOO_FREQUENT(4107, "验证码发送过于频繁"),
+    SMS_DAILY_LIMIT_EXCEEDED(4108, "今日验证码发送次数已达上限"),
+
     // 业务-报告
     REPORT_NOT_FOUND(4301, "报告不存在"),
     COMPARISON_ALREADY_EXISTS(4302, "对比报告已存在"),
@@ -58,7 +64,8 @@ public enum ResultCode {
     // ============== 6xxx 第三方服务错误 ==============
     AI_SERVICE_ERROR(6001, "AI服务调用失败"),
     AI_SERVICE_TIMEOUT(6002, "AI服务调用超时"),
-    LLM_ERROR(6003, "LLM服务异常");
+    LLM_ERROR(6003, "LLM服务异常"),
+    SMS_SEND_FAILED(6501, "短信发送失败");
 
     private final int code;
     private final String message;

@@ -47,7 +47,9 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/api/**")
                 .excludePathPatterns(
                         "/api/auth/register",
-                        "/api/auth/login"
+                        "/api/auth/login",
+                        "/api/auth/send-sms-code",
+                        "/api/auth/sms-login"
                 );
 
         // 管理端 JWT 拦截器

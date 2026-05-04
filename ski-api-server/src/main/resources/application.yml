@@ -2,7 +2,7 @@ spring:
   application:
     name: ski-api-server
   profiles:
-    active: dev   # 激活dev profile,生产改为 prod
+    active: local   # 激活local profile,生产改为 prod
 
   # 文件上传限制
   servlet:
@@ -74,9 +74,16 @@ ski:
 
   # 上传限制
   upload:
-    max-duration-seconds: 180      # 视频最长3分钟
+    max-duration-seconds: 60       # 视频最长1分钟
     allowed-extensions: mp4,mov,m4v
-    max-file-size-mb: 100
+    max-file-size-mb: 50
+
+  # 阿里云短信(密钥通过环境变量注入,开发和生产的实际值在各自profile中配置)
+  sms:
+    access-key-id: ${SMS_ACCESS_KEY_ID:}
+    access-key-secret: ${SMS_ACCESS_KEY_SECRET:}
+    sign-name: ${SMS_SIGN_NAME:}
+    template-code: ${SMS_TEMPLATE_CODE:}
 
   # 任务队列
   worker:

@@ -25,6 +25,11 @@ public final class RedisKeyConstant {
     // 任务正在运行的标记(防止同一任务重复消费)
     public static final String TASK_RUNNING = PREFIX + "task:running:";
 
+    // 短信验证码
+    public static final String SMS_CODE = PREFIX + "sms:code:";
+    public static final String SMS_SEND_LIMIT = PREFIX + "sms:limit:";
+    public static final String SMS_DAILY_LIMIT = PREFIX + "sms:daily:";
+
     // 用户上传频率限制(可选,后续做)
     public static final String UPLOAD_RATE_LIMIT = PREFIX + "user:upload_limit:";
 }

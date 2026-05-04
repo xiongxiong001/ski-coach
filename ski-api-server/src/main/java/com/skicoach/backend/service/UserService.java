@@ -3,6 +3,7 @@ package com.skicoach.backend.service;
 import com.skicoach.backend.dto.auth.LoginRequest;
 import com.skicoach.backend.dto.auth.LoginResponse;
 import com.skicoach.backend.dto.auth.RegisterRequest;
+import com.skicoach.backend.dto.auth.SmsLoginRequest;
 import com.skicoach.backend.dto.user.UpdateProfileRequest;
 import com.skicoach.backend.dto.user.UserProfileVO;
 import com.skicoach.backend.entity.User;
@@ -17,6 +18,12 @@ public interface UserService {
 
     /** 登录 */
     LoginResponse login(LoginRequest request);
+
+    /** 发送短信验证码 */
+    void sendSmsCode(String phone);
+
+    /** 验证码登录/注册 */
+    LoginResponse smsLogin(SmsLoginRequest request);
 
     /** 登出(把Token放进Redis黑名单) */
     void logout(String token);

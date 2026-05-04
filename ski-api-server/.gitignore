@@ -14,3 +14,4 @@ HELP.md
 *.log
 logs/
 .DS_Store
+application-local.yml

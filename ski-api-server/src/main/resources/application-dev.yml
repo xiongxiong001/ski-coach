@@ -47,3 +47,9 @@ spring:
           max-idle: 8
           min-idle: 0
           max-wait: -1ms
+
+# 项目自定义配置(开发环境覆盖)
+ski:
+  sms:
+    sign-name: "滑雪教练测试"
+    template-code: "SMS_12345678"

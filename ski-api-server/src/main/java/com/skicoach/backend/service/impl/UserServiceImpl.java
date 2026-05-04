@@ -10,15 +10,17 @@ import com.skicoach.backend.common.util.PasswordUtil;
 import com.skicoach.backend.dto.auth.LoginRequest;
 import com.skicoach.backend.dto.auth.LoginResponse;
 import com.skicoach.backend.dto.auth.RegisterRequest;
+import com.skicoach.backend.dto.auth.SmsLoginRequest;
 import com.skicoach.backend.dto.user.UpdateProfileRequest;
 import com.skicoach.backend.dto.user.UserProfileVO;
 import com.skicoach.backend.entity.User;
 import com.skicoach.backend.mapper.UserMapper;
+import com.skicoach.backend.service.SmsService;
 import com.skicoach.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +34,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final JwtUtil jwtUtil;
     private final StringRedisTemplate stringRedisTemplate;
+    private final SmsService smsService;
 
     @Value("${ski.jwt.expire-hours:168}")
     private long expireHours;
@@ -59,6 +62,41 @@ public class UserServiceImpl implements UserService {
         log.info("用户注册成功: userId={}, phone={}", user.getId(), maskPhone(user.getPhone()));
 
         // 3. 生成Token
+        return buildLoginResponse(user);
+    }
+
+    @Override
+    public void sendSmsCode(String phone) {
+        smsService.sendCode(phone);
+    }
+
+    @Override
+    public LoginResponse smsLogin(SmsLoginRequest request) {
+        // 1. 校验验证码
+        smsService.verifyCode(request.getPhone(), request.getCode());
+
+        // 2. 查找用户
+        User user = userMapper.selectOne(
+                new LambdaQueryWrapper<User>().eq(User::getPhone, request.getPhone())
+        );
+
+        if (user == null) {
+            // 3. 新用户自动注册(无密码)
+            user = new User();
+            user.setPhone(request.getPhone());
+            user.setNickname("雪友" + request.getPhone().substring(7));
+            user.setPasswordHash("");   // 短信登录注册的用户无密码
+            user.setStatus(UserStatusEnum.NORMAL.getValue());
+            userMapper.insert(user);
+            log.info("短信验证码自动注册: userId={}, phone={}", user.getId(), maskPhone(user.getPhone()));
+        } else {
+            // 4. 已有用户校验状态
+            if (!UserStatusEnum.NORMAL.getValue().equals(user.getStatus())) {
+                throw new BusinessException(ResultCode.USER_DISABLED);
+            }
+            log.info("短信验证码登录: userId={}, phone={}", user.getId(), maskPhone(user.getPhone()));
+        }
+
         return buildLoginResponse(user);
     }
 

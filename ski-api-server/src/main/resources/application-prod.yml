@@ -87,6 +87,11 @@ ski:
     secret: ${SKI_JWT_SECRET}
     admin-secret: ${SKI_JWT_ADMIN_SECRET}
     expire-hours: ${SKI_JWT_EXPIRE_HOURS:168}
+  sms:
+    access-key-id: ${SMS_ACCESS_KEY_ID}
+    access-key-secret: ${SMS_ACCESS_KEY_SECRET}
+    sign-name: ${SMS_SIGN_NAME}
+    template-code: ${SMS_TEMPLATE_CODE}
   worker:
     thread-count: ${SKI_WORKER_THREAD_COUNT:2}
 
