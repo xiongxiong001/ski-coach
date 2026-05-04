@@ -37,6 +37,18 @@ const routes = [
         name: 'Analytics',
         component: () => import('@/views/analytics/Analytics.vue'),
         meta: { title: '数据分析', icon: 'TrendCharts' }
+      },
+      {
+        path: 'reports',
+        name: 'Reports',
+        component: () => import('@/views/reports/ReportList.vue'),
+        meta: { title: '报告审阅', icon: 'FileText' }
+      },
+      {
+        path: 'comparisons',
+        name: 'Comparisons',
+        component: () => import('@/views/reports/ComparisonList.vue'),
+        meta: { title: '对比报告', icon: 'GitCompare' }
       }
     ]
   },

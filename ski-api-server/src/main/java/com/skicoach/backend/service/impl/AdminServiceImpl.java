@@ -13,6 +13,7 @@ import com.skicoach.backend.common.util.PasswordUtil;
 import com.skicoach.backend.dto.admin.*;
 import com.skicoach.backend.entity.Admin;
 import com.skicoach.backend.entity.AnalysisTask;
+import com.skicoach.backend.entity.ComparisonReport;
 import com.skicoach.backend.entity.User;
 import com.skicoach.backend.mapper.*;
 import com.skicoach.backend.service.AdminService;
@@ -32,6 +33,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -42,6 +44,7 @@ public class AdminServiceImpl implements AdminService {
     private final UserMapper userMapper;
     private final VideoMapper videoMapper;
     private final ReportMapper reportMapper;
+    private final ComparisonReportMapper comparisonReportMapper;
     private final AnalysisTaskMapper taskMapper;
     private final AdminStatsMapper statsMapper;
     private final JwtUtil jwtUtil;
@@ -335,6 +338,178 @@ public class AdminServiceImpl implements AdminService {
             vo.setFreeSpaceGB("0.00 GB");
         }
 
+        return vo;
+    }
+
+    // ============== 报告审阅 ==============
+
+    @Override
+    public PageResult<AdminReportListItemVO> listReports(ReportListQuery query) {
+        Page<com.skicoach.backend.entity.Report> page = new Page<>(query.getPageNum(), query.getPageSize());
+        
+        LambdaQueryWrapper<com.skicoach.backend.entity.Report> wrapper = new LambdaQueryWrapper<com.skicoach.backend.entity.Report>()
+                .orderByDesc(com.skicoach.backend.entity.Report::getCreatedTime);
+        
+        if (query.getUserId() != null) {
+            wrapper.eq(com.skicoach.backend.entity.Report::getUserId, query.getUserId());
+        }
+        if (query.getKeyword() != null && !query.getKeyword().isBlank()) {
+            wrapper.like(com.skicoach.backend.entity.Report::getReportMarkdown, query.getKeyword());
+        }
+        
+        Page<com.skicoach.backend.entity.Report> result = reportMapper.selectPage(page, wrapper);
+        
+        Set<Long> userIds = result.getRecords().stream()
+                .map(com.skicoach.backend.entity.Report::getUserId).collect(Collectors.toSet());
+        Map<Long, User> userMap = userMapper.selectBatchIds(userIds).stream()
+                .collect(Collectors.toMap(User::getId, u -> u));
+        
+        Set<Long> videoIds = result.getRecords().stream()
+                .map(com.skicoach.backend.entity.Report::getVideoId).collect(Collectors.toSet());
+        Map<Long, com.skicoach.backend.entity.Video> videoMap = videoMapper.selectBatchIds(videoIds).stream()
+                .collect(Collectors.toMap(com.skicoach.backend.entity.Video::getId, v -> v));
+        
+        List<AdminReportListItemVO> vos = result.getRecords().stream().map(r -> {
+            AdminReportListItemVO vo = new AdminReportListItemVO();
+            BeanUtils.copyProperties(r, vo);
+            
+            User user = userMap.get(r.getUserId());
+            if (user != null) {
+                vo.setPhone(user.getPhone());
+                vo.setNickname(user.getNickname());
+            }
+            
+            com.skicoach.backend.entity.Video video = videoMap.get(r.getVideoId());
+            if (video != null) {
+                vo.setOriginalFilename(video.getOriginalFilename());
+            }
+            
+            String markdown = r.getReportMarkdown();
+            vo.setReportSummary(markdown != null && markdown.length() > 200 
+                    ? markdown.substring(0, 200) + "..." 
+                    : markdown);
+            
+            return vo;
+        }).toList();
+        
+        Page<AdminReportListItemVO> voPage = new Page<>(result.getCurrent(), result.getSize(), result.getTotal());
+        voPage.setRecords(vos);
+        return PageResult.from(voPage);
+    }
+
+    @Override
+    public AdminReportDetailVO getReportDetail(Long reportId) {
+        com.skicoach.backend.entity.Report report = reportMapper.selectById(reportId);
+        if (report == null) {
+            throw new BusinessException(ResultCode.PARAM_ERROR, "报告不存在");
+        }
+        
+        AdminReportDetailVO vo = new AdminReportDetailVO();
+        BeanUtils.copyProperties(report, vo);
+        
+        User user = userMapper.selectById(report.getUserId());
+        if (user != null) {
+            vo.setPhone(user.getPhone());
+            vo.setNickname(user.getNickname());
+        }
+        
+        com.skicoach.backend.entity.Video video = videoMapper.selectById(report.getVideoId());
+        if (video != null) {
+            vo.setOriginalFilename(video.getOriginalFilename());
+            vo.setFileMd5(video.getFileMd5());
+        }
+        
+        return vo;
+    }
+
+    @Override
+    public PageResult<AdminComparisonListItemVO> listComparisonReports(ReportListQuery query) {
+        Page<ComparisonReport> page = new Page<>(query.getPageNum(), query.getPageSize());
+        
+        LambdaQueryWrapper<ComparisonReport> wrapper = new LambdaQueryWrapper<ComparisonReport>()
+                .orderByDesc(ComparisonReport::getCreatedTime);
+        
+        if (query.getUserId() != null) {
+            wrapper.eq(ComparisonReport::getUserId, query.getUserId());
+        }
+        if (query.getKeyword() != null && !query.getKeyword().isBlank()) {
+            wrapper.like(ComparisonReport::getReportMarkdown, query.getKeyword());
+        }
+        
+        Page<ComparisonReport> result = comparisonReportMapper.selectPage(page, wrapper);
+        
+        Set<Long> userIds = result.getRecords().stream()
+                .map(ComparisonReport::getUserId).collect(Collectors.toSet());
+        Map<Long, User> userMap = userMapper.selectBatchIds(userIds).stream()
+                .collect(Collectors.toMap(User::getId, u -> u));
+        
+        Set<Long> videoIds = new HashSet<>();
+        result.getRecords().forEach(r -> {
+            videoIds.add(r.getPrevVideoId());
+            videoIds.add(r.getCurrVideoId());
+        });
+        Map<Long, com.skicoach.backend.entity.Video> videoMap = videoMapper.selectBatchIds(videoIds).stream()
+                .collect(Collectors.toMap(com.skicoach.backend.entity.Video::getId, v -> v));
+        
+        List<AdminComparisonListItemVO> vos = result.getRecords().stream().map(r -> {
+            AdminComparisonListItemVO vo = new AdminComparisonListItemVO();
+            BeanUtils.copyProperties(r, vo);
+            
+            User user = userMap.get(r.getUserId());
+            if (user != null) {
+                vo.setPhone(user.getPhone());
+                vo.setNickname(user.getNickname());
+            }
+            
+            com.skicoach.backend.entity.Video prevVideo = videoMap.get(r.getPrevVideoId());
+            if (prevVideo != null) {
+                vo.setPrevFilename(prevVideo.getOriginalFilename());
+            }
+            
+            com.skicoach.backend.entity.Video currVideo = videoMap.get(r.getCurrVideoId());
+            if (currVideo != null) {
+                vo.setCurrFilename(currVideo.getOriginalFilename());
+            }
+            
+            String markdown = r.getReportMarkdown();
+            vo.setReportSummary(markdown != null && markdown.length() > 200 
+                    ? markdown.substring(0, 200) + "..." 
+                    : markdown);
+            
+            return vo;
+        }).toList();
+        
+        Page<AdminComparisonListItemVO> voPage = new Page<>(result.getCurrent(), result.getSize(), result.getTotal());
+        voPage.setRecords(vos);
+        return PageResult.from(voPage);
+    }
+
+    @Override
+    public AdminComparisonDetailVO getComparisonReportDetail(Long reportId) {
+        ComparisonReport report = comparisonReportMapper.selectById(reportId);
+        if (report == null) {
+            throw new BusinessException(ResultCode.PARAM_ERROR, "对比报告不存在");
+        }
+        
+        AdminComparisonDetailVO vo = new AdminComparisonDetailVO();
+        BeanUtils.copyProperties(report, vo);
+        
+        User user = userMapper.selectById(report.getUserId());
+        if (user != null) {
+            vo.setPhone(user.getPhone());
+            vo.setNickname(user.getNickname());
+        }
+        
+        com.skicoach.backend.entity.Video prevVideo = videoMapper.selectById(report.getPrevVideoId());
+        if (prevVideo != null) {
+            vo.setPrevFilename(prevVideo.getOriginalFilename());
+        }
+        
+        com.skicoach.backend.entity.Video currVideo = videoMapper.selectById(report.getCurrVideoId());
+        if (currVideo != null) {
+            vo.setCurrFilename(currVideo.getOriginalFilename());
+        }
+        
         return vo;
     }
 

@@ -36,4 +36,13 @@ public interface AdminService {
     List<LlmCostStatsVO> getLlmCostStats();
 
     StorageStatsVO getStorageStats();
+
+    // ============== 报告审阅 ==============
+    PageResult<AdminReportListItemVO> listReports(ReportListQuery query);
+
+    AdminReportDetailVO getReportDetail(Long reportId);
+
+    PageResult<AdminComparisonListItemVO> listComparisonReports(ReportListQuery query);
+
+    AdminComparisonDetailVO getComparisonReportDetail(Long reportId);
 }

@@ -81,7 +81,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   DataAnalysis, User, Cpu, TrendCharts, Fold, Expand,
-  ArrowDown, SwitchButton
+  ArrowDown, SwitchButton, Document
 } from '@element-plus/icons-vue'
 import { useAdminStore } from '@/stores/admin'
 
@@ -95,7 +95,9 @@ const menuItems = [
   { path: '/dashboard', title: '数据总览', icon: DataAnalysis },
   { path: '/users',     title: '用户管理', icon: User },
   { path: '/tasks',     title: '任务管理', icon: Cpu },
-  { path: '/analytics', title: '数据分析', icon: TrendCharts }
+  { path: '/analytics', title: '数据分析', icon: TrendCharts },
+  { path: '/reports',   title: '报告审阅', icon: Document },
+  { path: '/comparisons', title: '对比报告', icon: Document }
 ]
 
 const avatarText = computed(() => {
