@@ -31,7 +31,7 @@
       <svg width="0" height="0" style="position:absolute">
         <defs>
           <linearGradient id="tabGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#3B82F6" />
+            <stop offset="0%" stop-color="#2563EB" />
             <stop offset="100%" stop-color="#8B5CF6" />
           </linearGradient>
         </defs>
@@ -107,7 +107,7 @@ function navigateTo(tab) {
   display: flex;
   height: 64px;
   padding-bottom: $safe-bottom;
-  background: rgba(20, 25, 55, 0.85);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-top: 1px solid $border-light;

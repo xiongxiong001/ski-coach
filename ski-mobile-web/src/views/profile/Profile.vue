@@ -65,7 +65,7 @@
       v-model:show="showEditDialog"
       title="修改昵称"
       show-cancel-button
-      confirm-button-color="#3B82F6"
+      confirm-button-color="#2563EB"
       :before-close="handleSaveNickname"
     >
       <div class="dialog-input-wrap">
@@ -120,7 +120,7 @@ function showAbout() {
     title: 'Ski Coach',
     message: 'AI 滑雪教练\n基于姿态识别和大语言模型,\n为每个雪友提供个性化点评\n\nv1.0.0',
     confirmButtonText: '知道了',
-    confirmButtonColor: '#3B82F6'
+    confirmButtonColor: '#2563EB'
   })
 }
 
@@ -151,7 +151,7 @@ async function handleLogout() {
 .profile-hero {
   position: relative;
   padding: calc(40px + #{$safe-top}) $space-lg $space-3xl;
-  background: linear-gradient(180deg, #1a1f4f 0%, $bg-base 100%);
+  background: linear-gradient(180deg, #DBEAFE 0%, $bg-base 100%);
   overflow: hidden;
 }
 

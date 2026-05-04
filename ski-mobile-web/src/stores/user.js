@@ -27,6 +27,12 @@ export const useUserStore = defineStore('user', {
       return data
     },
 
+    async smsLogin(form) {
+      const data = await authApi.smsLogin(form)
+      this.setAuth(data)
+      return data
+    },
+
     async logout() {
       try {
         if (this.token) await authApi.logout()

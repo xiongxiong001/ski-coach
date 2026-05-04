@@ -119,7 +119,7 @@ async function handleSubmit() {
     position: absolute;
     border-radius: 50%;
     filter: blur(60px);
-    opacity: 0.4;
+    opacity: 0.2;
   }
   .orb-1 {
     top: -120px; right: -100px;

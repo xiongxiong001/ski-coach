@@ -181,7 +181,7 @@ async function handleShare() {
   justify-content: space-between;
   padding: 12px $space-md;
   padding-top: calc(12px + #{$safe-top});
-  background: rgba(10, 14, 39, 0.85);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid $border-light;
@@ -205,9 +205,9 @@ async function handleShare() {
   margin: $space-md $space-lg 0;
   padding: $space-2xl $space-lg;
   border-radius: $radius-xl;
-  background: linear-gradient(135deg, #1e3a8a 0%, #6d28d9 50%, #be185d 100%);
+  background: linear-gradient(135deg, #DBEAFE 0%, #C7D2FE 50%, #FCE7F3 100%);
   overflow: hidden;
-  color: white;
+  color: $text-primary;
 }
 
 .hero-bg {
@@ -266,10 +266,10 @@ async function handleShare() {
 }
 
 .metric {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: $radius-md;
   padding: $space-md $space-xs;
   text-align: center;

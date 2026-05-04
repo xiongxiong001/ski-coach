@@ -174,11 +174,11 @@ async function loadMore() {
 .card-hero {
   position: relative;
   padding: $space-md $space-lg;
-  background: linear-gradient(135deg, #1e3a8a 0%, #6d28d9 50%, #be185d 100%);
+  background: linear-gradient(135deg, #DBEAFE 0%, #C7D2FE 50%, #FCE7F3 100%);
   display: flex;
   align-items: center;
   gap: $space-md;
-  color: white;
+  color: $text-primary;
   overflow: hidden;
 }
 

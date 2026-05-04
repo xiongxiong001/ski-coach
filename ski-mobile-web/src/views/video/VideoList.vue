@@ -495,7 +495,7 @@ function goDetail(v) {
 
   .ring-bg {
     fill: none;
-    stroke: rgba(255,255,255,0.1);
+    stroke: $border-light;
     stroke-width: 6;
   }
   .ring-fill {

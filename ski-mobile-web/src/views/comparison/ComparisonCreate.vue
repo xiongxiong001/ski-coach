@@ -237,7 +237,7 @@ async function handleSubmit() {
   justify-content: space-between;
   padding: 12px $space-md;
   padding-top: calc(12px + #{$safe-top});
-  background: rgba(10, 14, 39, 0.85);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid $border-light;
@@ -307,7 +307,7 @@ async function handleSubmit() {
     animation: gentle-pulse 2s infinite;
   }
   &.filled {
-    border-color: rgba(255, 255, 255, 0.2);
+    border-color: $color-primary;
   }
 }
 
@@ -341,7 +341,7 @@ async function handleSubmit() {
   height: 36px;
   margin: 0 auto 4px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
+  background: $bg-elevated;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -558,7 +558,7 @@ async function handleSubmit() {
   bottom: 0;
   padding: $space-md $space-lg;
   padding-bottom: calc(#{$space-md} + #{$safe-bottom});
-  background: linear-gradient(180deg, rgba(10, 14, 39, 0) 0%, rgba(10, 14, 39, 0.95) 30%);
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0) 0%, rgba(248, 250, 252, 0.95) 30%);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   pointer-events: none;

@@ -98,7 +98,7 @@
         </div>
         <ul class="tips-list">
           <li><span class="tip-key">视角</span>第三人称(让朋友帮拍),全身入镜</li>
-          <li><span class="tip-key">时长</span>20 秒到 3 分钟,不超过 100MB</li>
+          <li><span class="tip-key">时长</span>40 秒到 1 分钟,不超过 50MB</li>
           <li><span class="tip-key">动作</span>包含完整转弯(至少 2-3 个连续转弯)</li>
           <li><span class="tip-key">格式</span>支持 mp4、mov、m4v</li>
         </ul>
@@ -168,7 +168,7 @@ onMounted(async () => {
   position: relative;
   padding: calc(20px + #{$safe-top}) $space-lg $space-3xl;
   overflow: hidden;
-  background: linear-gradient(180deg, #1a1f4f 0%, $bg-base 100%);
+  background: linear-gradient(180deg, #DBEAFE 0%, $bg-base 100%);
 }
 
 .hero-bg {

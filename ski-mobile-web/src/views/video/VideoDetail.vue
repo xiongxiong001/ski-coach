@@ -251,7 +251,7 @@ async function handleDelete() {
   justify-content: space-between;
   padding: 12px $space-md;
   padding-top: calc(12px + #{$safe-top});
-  background: rgba(10, 14, 39, 0.85);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid $border-light;
