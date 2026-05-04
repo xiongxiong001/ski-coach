@@ -14,7 +14,9 @@ import com.skicoach.backend.dto.admin.*;
 import com.skicoach.backend.entity.Admin;
 import com.skicoach.backend.entity.AnalysisTask;
 import com.skicoach.backend.entity.ComparisonReport;
+import com.skicoach.backend.entity.Report;
 import com.skicoach.backend.entity.User;
+import com.skicoach.backend.entity.Video;
 import com.skicoach.backend.mapper.*;
 import com.skicoach.backend.service.AdminService;
 import lombok.RequiredArgsConstructor;
@@ -129,14 +131,14 @@ public class AdminServiceImpl implements AdminService {
             BeanUtils.copyProperties(u, vo);
             // 视频数(不含逻辑删除,MP 自动过滤)
             Long videoCount = videoMapper.selectCount(
-                    new LambdaQueryWrapper<com.skicoach.backend.entity.Video>()
-                            .eq(com.skicoach.backend.entity.Video::getUserId, u.getId())
+                    new LambdaQueryWrapper<Video>()
+                            .eq(Video::getUserId, u.getId())
             );
             vo.setVideoCount(videoCount.intValue());
             // 报告数
             Long reportCount = reportMapper.selectCount(
-                    new LambdaQueryWrapper<com.skicoach.backend.entity.Report>()
-                            .eq(com.skicoach.backend.entity.Report::getUserId, u.getId())
+                    new LambdaQueryWrapper<Report>()
+                            .eq(Report::getUserId, u.getId())
             );
             vo.setReportCount(reportCount.intValue());
             return vo;
@@ -156,13 +158,13 @@ public class AdminServiceImpl implements AdminService {
         AdminUserVO vo = new AdminUserVO();
         BeanUtils.copyProperties(user, vo);
         Long videoCount = videoMapper.selectCount(
-                new LambdaQueryWrapper<com.skicoach.backend.entity.Video>()
-                        .eq(com.skicoach.backend.entity.Video::getUserId, userId)
+                new LambdaQueryWrapper<Video>()
+                        .eq(Video::getUserId, userId)
         );
         vo.setVideoCount(videoCount.intValue());
         Long reportCount = reportMapper.selectCount(
-                new LambdaQueryWrapper<com.skicoach.backend.entity.Report>()
-                        .eq(com.skicoach.backend.entity.Report::getUserId, userId)
+                new LambdaQueryWrapper<Report>()
+                        .eq(Report::getUserId, userId)
         );
         vo.setReportCount(reportCount.intValue());
         return vo;
@@ -345,53 +347,54 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public PageResult<AdminReportListItemVO> listReports(ReportListQuery query) {
-        Page<com.skicoach.backend.entity.Report> page = new Page<>(query.getPageNum(), query.getPageSize());
-        
-        LambdaQueryWrapper<com.skicoach.backend.entity.Report> wrapper = new LambdaQueryWrapper<com.skicoach.backend.entity.Report>()
-                .orderByDesc(com.skicoach.backend.entity.Report::getCreatedTime);
-        
+        // 解析筛选条件
+        List<Long> filterUserIds = resolveUserIdFilter(query);
+        if (filterUserIds != null && filterUserIds.isEmpty()) {
+            // 按手机号搜索没找到任何用户,直接返回空
+            return emptyPage(query.getPageNum(), query.getPageSize());
+        }
+
+        Page<Report> page = new Page<>(query.getPageNum(), query.getPageSize());
+        LambdaQueryWrapper<Report> wrapper = new LambdaQueryWrapper<Report>()
+                .orderByDesc(Report::getCreatedTime);
         if (query.getUserId() != null) {
-            wrapper.eq(com.skicoach.backend.entity.Report::getUserId, query.getUserId());
+            wrapper.eq(Report::getUserId, query.getUserId());
+        } else if (filterUserIds != null) {
+            wrapper.in(Report::getUserId, filterUserIds);
         }
-        if (query.getKeyword() != null && !query.getKeyword().isBlank()) {
-            wrapper.like(com.skicoach.backend.entity.Report::getReportMarkdown, query.getKeyword());
-        }
-        
-        Page<com.skicoach.backend.entity.Report> result = reportMapper.selectPage(page, wrapper);
-        
-        Set<Long> userIds = result.getRecords().stream()
-                .map(com.skicoach.backend.entity.Report::getUserId).collect(Collectors.toSet());
-        Map<Long, User> userMap = userMapper.selectBatchIds(userIds).stream()
-                .collect(Collectors.toMap(User::getId, u -> u));
-        
-        Set<Long> videoIds = result.getRecords().stream()
-                .map(com.skicoach.backend.entity.Report::getVideoId).collect(Collectors.toSet());
-        Map<Long, com.skicoach.backend.entity.Video> videoMap = videoMapper.selectBatchIds(videoIds).stream()
-                .collect(Collectors.toMap(com.skicoach.backend.entity.Video::getId, v -> v));
-        
+
+        Page<Report> result = reportMapper.selectPage(page, wrapper);
+
+        // 批量加载用户和视频信息(避免 N+1)
+        Map<Long, User> userMap = batchLoadUsers(result.getRecords().stream()
+                .map(Report::getUserId).distinct().toList());
+        Map<Long, Video> videoMap = batchLoadVideos(result.getRecords().stream()
+                .map(Report::getVideoId).distinct().toList());
+
         List<AdminReportListItemVO> vos = result.getRecords().stream().map(r -> {
             AdminReportListItemVO vo = new AdminReportListItemVO();
-            BeanUtils.copyProperties(r, vo);
-            
+            vo.setId(r.getId());
+            vo.setUserId(r.getUserId());
+            vo.setVideoId(r.getVideoId());
+            vo.setTaskId(r.getTaskId());
+            vo.setReportPreview(truncatePreview(r.getReportMarkdown(), 200));
+            vo.setLlmCostYuan(r.getLlmCostYuan());
+            vo.setLlmInputTokens(r.getLlmInputTokens());
+            vo.setLlmOutputTokens(r.getLlmOutputTokens());
+            vo.setCreatedTime(r.getCreatedTime());
+
             User user = userMap.get(r.getUserId());
             if (user != null) {
-                vo.setPhone(user.getPhone());
-                vo.setNickname(user.getNickname());
+                vo.setUserPhone(maskPhone(user.getPhone()));
+                vo.setUserNickname(user.getNickname());
             }
-            
-            com.skicoach.backend.entity.Video video = videoMap.get(r.getVideoId());
+            Video video = videoMap.get(r.getVideoId());
             if (video != null) {
-                vo.setOriginalFilename(video.getOriginalFilename());
+                vo.setVideoFilename(video.getOriginalFilename());
             }
-            
-            String markdown = r.getReportMarkdown();
-            vo.setReportSummary(markdown != null && markdown.length() > 200 
-                    ? markdown.substring(0, 200) + "..." 
-                    : markdown);
-            
             return vo;
         }).toList();
-        
+
         Page<AdminReportListItemVO> voPage = new Page<>(result.getCurrent(), result.getSize(), result.getTotal());
         voPage.setRecords(vos);
         return PageResult.from(voPage);
@@ -399,118 +402,172 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public AdminReportDetailVO getReportDetail(Long reportId) {
-        com.skicoach.backend.entity.Report report = reportMapper.selectById(reportId);
+        Report report = reportMapper.selectById(reportId);
         if (report == null) {
-            throw new BusinessException(ResultCode.PARAM_ERROR, "报告不存在");
+            throw new BusinessException(ResultCode.REPORT_NOT_FOUND);
         }
-        
+
         AdminReportDetailVO vo = new AdminReportDetailVO();
-        BeanUtils.copyProperties(report, vo);
-        
+        vo.setId(report.getId());
+        vo.setUserId(report.getUserId());
+        vo.setVideoId(report.getVideoId());
+        vo.setTaskId(report.getTaskId());
+        vo.setReportMarkdown(report.getReportMarkdown());
+        vo.setLlmCostYuan(report.getLlmCostYuan());
+        vo.setLlmInputTokens(report.getLlmInputTokens());
+        vo.setLlmOutputTokens(report.getLlmOutputTokens());
+        vo.setCreatedTime(report.getCreatedTime());
+
+        // 关联用户
         User user = userMapper.selectById(report.getUserId());
         if (user != null) {
-            vo.setPhone(user.getPhone());
-            vo.setNickname(user.getNickname());
+            vo.setUserPhone(user.getPhone());
+            vo.setUserNickname(user.getNickname());
         }
-        
-        com.skicoach.backend.entity.Video video = videoMapper.selectById(report.getVideoId());
+        // 关联视频(可能因逻辑删除查不到,这种情况留空即可)
+        Video video = videoMapper.selectById(report.getVideoId());
         if (video != null) {
-            vo.setOriginalFilename(video.getOriginalFilename());
-            vo.setFileMd5(video.getFileMd5());
+            vo.setVideoFilename(video.getOriginalFilename());
+            vo.setVideoDetectionRate(video.getDetectionRate());
+            vo.setVideoDurationSeconds(video.getDurationSeconds());
+            vo.setTurnLeftCount(video.getTurnLeftCount());
+            vo.setTurnRightCount(video.getTurnRightCount());
         }
-        
+
         return vo;
     }
 
     @Override
-    public PageResult<AdminComparisonListItemVO> listComparisonReports(ReportListQuery query) {
+    public PageResult<AdminComparisonListItemVO> listComparisons(ReportListQuery query) {
+        List<Long> filterUserIds = resolveUserIdFilter(query);
+        if (filterUserIds != null && filterUserIds.isEmpty()) {
+            return emptyPage(query.getPageNum(), query.getPageSize());
+        }
+
         Page<ComparisonReport> page = new Page<>(query.getPageNum(), query.getPageSize());
-        
         LambdaQueryWrapper<ComparisonReport> wrapper = new LambdaQueryWrapper<ComparisonReport>()
                 .orderByDesc(ComparisonReport::getCreatedTime);
-        
         if (query.getUserId() != null) {
             wrapper.eq(ComparisonReport::getUserId, query.getUserId());
+        } else if (filterUserIds != null) {
+            wrapper.in(ComparisonReport::getUserId, filterUserIds);
         }
-        if (query.getKeyword() != null && !query.getKeyword().isBlank()) {
-            wrapper.like(ComparisonReport::getReportMarkdown, query.getKeyword());
-        }
-        
+
         Page<ComparisonReport> result = comparisonReportMapper.selectPage(page, wrapper);
-        
-        Set<Long> userIds = result.getRecords().stream()
-                .map(ComparisonReport::getUserId).collect(Collectors.toSet());
-        Map<Long, User> userMap = userMapper.selectBatchIds(userIds).stream()
-                .collect(Collectors.toMap(User::getId, u -> u));
-        
-        Set<Long> videoIds = new HashSet<>();
-        result.getRecords().forEach(r -> {
-            videoIds.add(r.getPrevVideoId());
-            videoIds.add(r.getCurrVideoId());
-        });
-        Map<Long, com.skicoach.backend.entity.Video> videoMap = videoMapper.selectBatchIds(videoIds).stream()
-                .collect(Collectors.toMap(com.skicoach.backend.entity.Video::getId, v -> v));
-        
+
+        Map<Long, User> userMap = batchLoadUsers(result.getRecords().stream()
+                .map(ComparisonReport::getUserId).distinct().toList());
+
         List<AdminComparisonListItemVO> vos = result.getRecords().stream().map(r -> {
             AdminComparisonListItemVO vo = new AdminComparisonListItemVO();
-            BeanUtils.copyProperties(r, vo);
-            
+            vo.setId(r.getId());
+            vo.setUserId(r.getUserId());
+            vo.setPrevVideoId(r.getPrevVideoId());
+            vo.setCurrVideoId(r.getCurrVideoId());
+            vo.setImprovedCount(r.getImprovedCount());
+            vo.setDeclinedCount(r.getDeclinedCount());
+            vo.setStabilityImprovedCount(r.getStabilityImprovedCount());
+            vo.setReportPreview(truncatePreview(r.getReportMarkdown(), 200));
+            vo.setLlmCostYuan(r.getLlmCostYuan());
+            vo.setCreatedTime(r.getCreatedTime());
+
             User user = userMap.get(r.getUserId());
             if (user != null) {
-                vo.setPhone(user.getPhone());
-                vo.setNickname(user.getNickname());
+                vo.setUserPhone(maskPhone(user.getPhone()));
+                vo.setUserNickname(user.getNickname());
             }
-            
-            com.skicoach.backend.entity.Video prevVideo = videoMap.get(r.getPrevVideoId());
-            if (prevVideo != null) {
-                vo.setPrevFilename(prevVideo.getOriginalFilename());
-            }
-            
-            com.skicoach.backend.entity.Video currVideo = videoMap.get(r.getCurrVideoId());
-            if (currVideo != null) {
-                vo.setCurrFilename(currVideo.getOriginalFilename());
-            }
-            
-            String markdown = r.getReportMarkdown();
-            vo.setReportSummary(markdown != null && markdown.length() > 200 
-                    ? markdown.substring(0, 200) + "..." 
-                    : markdown);
-            
             return vo;
         }).toList();
-        
+
         Page<AdminComparisonListItemVO> voPage = new Page<>(result.getCurrent(), result.getSize(), result.getTotal());
         voPage.setRecords(vos);
         return PageResult.from(voPage);
     }
 
     @Override
-    public AdminComparisonDetailVO getComparisonReportDetail(Long reportId) {
+    public AdminComparisonDetailVO getComparisonDetail(Long reportId) {
         ComparisonReport report = comparisonReportMapper.selectById(reportId);
         if (report == null) {
-            throw new BusinessException(ResultCode.PARAM_ERROR, "对比报告不存在");
+            throw new BusinessException(ResultCode.REPORT_NOT_FOUND);
         }
-        
+
         AdminComparisonDetailVO vo = new AdminComparisonDetailVO();
-        BeanUtils.copyProperties(report, vo);
-        
+        vo.setId(report.getId());
+        vo.setUserId(report.getUserId());
+        vo.setPrevVideoId(report.getPrevVideoId());
+        vo.setCurrVideoId(report.getCurrVideoId());
+        vo.setTaskId(report.getTaskId());
+        vo.setReportMarkdown(report.getReportMarkdown());
+        vo.setComparisonDataJson(report.getComparisonDataJson());
+        vo.setImprovedCount(report.getImprovedCount());
+        vo.setDeclinedCount(report.getDeclinedCount());
+        vo.setStabilityImprovedCount(report.getStabilityImprovedCount());
+        vo.setLlmCostYuan(report.getLlmCostYuan());
+        vo.setLlmInputTokens(report.getLlmInputTokens());
+        vo.setLlmOutputTokens(report.getLlmOutputTokens());
+        vo.setCreatedTime(report.getCreatedTime());
+
         User user = userMapper.selectById(report.getUserId());
         if (user != null) {
-            vo.setPhone(user.getPhone());
-            vo.setNickname(user.getNickname());
+            vo.setUserPhone(user.getPhone());
+            vo.setUserNickname(user.getNickname());
         }
-        
-        com.skicoach.backend.entity.Video prevVideo = videoMapper.selectById(report.getPrevVideoId());
-        if (prevVideo != null) {
-            vo.setPrevFilename(prevVideo.getOriginalFilename());
-        }
-        
-        com.skicoach.backend.entity.Video currVideo = videoMapper.selectById(report.getCurrVideoId());
-        if (currVideo != null) {
-            vo.setCurrFilename(currVideo.getOriginalFilename());
-        }
-        
+        Video prev = videoMapper.selectById(report.getPrevVideoId());
+        if (prev != null) vo.setPrevVideoFilename(prev.getOriginalFilename());
+        Video curr = videoMapper.selectById(report.getCurrVideoId());
+        if (curr != null) vo.setCurrVideoFilename(curr.getOriginalFilename());
+
         return vo;
+    }
+
+    // ============== 私有工具(报告审阅相关) ==============
+
+    /** 解析"按手机号搜索"过滤条件 → 用户 ID 列表(null=不过滤,empty=没找到匹配用户) */
+    private List<Long> resolveUserIdFilter(ReportListQuery query) {
+        if (query.getUserPhone() == null || query.getUserPhone().isBlank()) {
+            return null;
+        }
+        // 按手机号模糊搜索拿到 userIds
+        List<User> users = userMapper.selectList(
+                new LambdaQueryWrapper<User>()
+                        .like(User::getPhone, query.getUserPhone())
+                        .select(User::getId)
+        );
+        return users.stream().map(User::getId).toList();
+    }
+
+    private Map<Long, User> batchLoadUsers(List<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) return Collections.emptyMap();
+        return userMapper.selectBatchIds(userIds).stream()
+                .collect(Collectors.toMap(User::getId, u -> u, (a, b) -> a));
+    }
+
+    private Map<Long, Video> batchLoadVideos(List<Long> videoIds) {
+        if (videoIds == null || videoIds.isEmpty()) return Collections.emptyMap();
+        return videoMapper.selectBatchIds(videoIds).stream()
+                .collect(Collectors.toMap(Video::getId, v -> v, (a, b) -> a));
+    }
+
+    private String truncatePreview(String markdown, int max) {
+        if (markdown == null) return "";
+        // 简单去掉 markdown 标记符号,让摘要更易读
+        String plain = markdown
+                .replaceAll("[#>*_`~\\[\\]\\(\\)!-]", "")
+                .replaceAll("\\s+", " ")
+                .trim();
+        if (plain.length() <= max) return plain;
+        return plain.substring(0, max) + "...";
+    }
+
+    private String maskPhone(String phone) {
+        if (phone == null || phone.length() < 11) return phone;
+        return phone.substring(0, 3) + "****" + phone.substring(7);
+    }
+
+    private <T> PageResult<T> emptyPage(Long pageNum, Long pageSize) {
+        Page<T> empty = new Page<>(pageNum, pageSize, 0);
+        empty.setRecords(Collections.emptyList());
+        return PageResult.from(empty);
     }
 
     // -------- 私有工具 --------

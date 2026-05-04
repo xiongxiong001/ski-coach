@@ -37,12 +37,12 @@ public interface AdminService {
 
     StorageStatsVO getStorageStats();
 
-    // ============== 报告审阅 ==============
+
     PageResult<AdminReportListItemVO> listReports(ReportListQuery query);
 
     AdminReportDetailVO getReportDetail(Long reportId);
 
-    PageResult<AdminComparisonListItemVO> listComparisonReports(ReportListQuery query);
+    PageResult<AdminComparisonListItemVO> listComparisons(ReportListQuery query);
 
-    AdminComparisonDetailVO getComparisonReportDetail(Long reportId);
+    AdminComparisonDetailVO getComparisonDetail(Long reportId);
 }

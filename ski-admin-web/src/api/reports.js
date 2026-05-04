@@ -1,4 +1,3 @@
-// ski-admin-web/src/api/reports.js
 import http from './http'
 
 export function listReports(params) {
@@ -9,10 +8,10 @@ export function getReportDetail(id) {
   return http.get(`/admin/reports/${id}`)
 }
 
-export function listComparisonReports(params) {
-  return http.get('/admin/reports/comparisons', { params })
+export function listComparisons(params) {
+  return http.get('/admin/comparisons', { params })
 }
 
-export function getComparisonReportDetail(id) {
-  return http.get(`/admin/reports/comparisons/${id}`)
+export function getComparisonDetail(id) {
+  return http.get(`/admin/comparisons/${id}`)
 }

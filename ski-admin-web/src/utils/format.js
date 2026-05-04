@@ -27,7 +27,10 @@ export function formatNumber(num) {
 
 export function formatYuan(num) {
   if (num == null) return '¥0.00'
-  return '¥' + Number(num).toFixed(2)
+  return '¥' + Number(num).toLocaleString('zh-CN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 10
+  })
 }
 
 /** 字节大小:1024 -> 1 KB */
