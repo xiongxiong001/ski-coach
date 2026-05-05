@@ -19,6 +19,9 @@ public class ReportDetailVO {
     @Schema(description = "关联的视频文件名")
     private String videoFilename;
 
+    @Schema(description = "视频时长(秒)")
+    private java.math.BigDecimal videoDurationSeconds;
+
     @Schema(description = "中文教练报告(Markdown)")
     private String reportMarkdown;
 

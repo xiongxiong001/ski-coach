@@ -77,8 +77,12 @@
           class="report-card"
           @click="router.push(`/reports/${r.id}`)"
         >
-          <div class="report-icon-wrap">
-            <div class="report-icon">📄</div>
+          <!-- 视频缩略图占位 -->
+          <div class="report-thumb" :class="`thumb-${r.videoId % 5}`">
+            <div class="thumb-icon">⛷️</div>
+            <div v-if="r.videoDurationSeconds" class="duration-badge">
+              {{ formatDuration(r.videoDurationSeconds) }}
+            </div>
           </div>
           <div class="report-info">
             <div class="report-title">{{ r.videoFilename || 'AI 教练点评' }}</div>
@@ -114,7 +118,7 @@ import { useUserStore } from '@/stores/user'
 import { listVideos } from '@/api/video'
 import { listReports } from '@/api/report'
 import { listComparisons } from '@/api/comparison'
-import { formatDate } from '@/utils/format'
+import { formatDate, formatDuration } from '@/utils/format'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -373,18 +377,46 @@ onMounted(async () => {
 
   &:active { transform: scale(0.98); border-color: $color-primary; }
 
-  .report-icon-wrap {
+  // 视频缩略图占位
+  .report-thumb {
     width: 44px;
     height: 44px;
-    background: $gradient-warm;
     border-radius: $radius-md;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+
+    &.thumb-0 { background: linear-gradient(135deg, #1e3a8a 0%, #6d28d9 100%); }
+    &.thumb-1 { background: linear-gradient(135deg, #075985 0%, #0c4a6e 100%); }
+    &.thumb-2 { background: linear-gradient(135deg, #4c1d95 0%, #7e22ce 100%); }
+    &.thumb-3 { background: linear-gradient(135deg, #134e4a 0%, #0f766e 100%); }
+    &.thumb-4 { background: linear-gradient(135deg, #831843 0%, #be185d 100%); }
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.12) 0%, transparent 60%);
+    }
   }
-  .report-icon {
-    font-size: 22px;
+  .thumb-icon {
+    font-size: 18px;
+    position: relative;
+    z-index: 1;
+  }
+  .duration-badge {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    font-size: 9px;
+    color: white;
+    background: rgba(0,0,0,0.6);
+    padding: 1px 4px;
+    border-radius: 2px;
+    z-index: 1;
   }
   .report-info {
     flex: 1;

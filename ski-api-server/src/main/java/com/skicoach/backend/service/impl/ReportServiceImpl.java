@@ -68,17 +68,21 @@ public class ReportServiceImpl implements ReportService {
                         .eq(Report::getUserId, userId)
                         .orderByDesc(Report::getCreatedTime));
 
-        // 批量加载视频文件名(避免 N+1)
+        // 批量加载视频信息(避免 N+1)
         List<Long> videoIds = result.getRecords().stream()
                 .map(Report::getVideoId).distinct().toList();
-        Map<Long, String> filenameMap = videoIds.isEmpty() ? Collections.emptyMap()
+        Map<Long, Video> videoMap = videoIds.isEmpty() ? Collections.emptyMap()
                 : videoMapper.selectBatchIds(videoIds).stream()
-                        .collect(Collectors.toMap(Video::getId, Video::getOriginalFilename, (a, b) -> a));
+                        .collect(Collectors.toMap(Video::getId, v -> v, (a, b) -> a));
 
         List<ReportDetailVO> vos = result.getRecords().stream().map(r -> {
             ReportDetailVO vo = new ReportDetailVO();
             BeanUtils.copyProperties(r, vo);
-            vo.setVideoFilename(filenameMap.get(r.getVideoId()));
+            Video video = videoMap.get(r.getVideoId());
+            if (video != null) {
+                vo.setVideoFilename(video.getOriginalFilename());
+                vo.setVideoDurationSeconds(video.getDurationSeconds());
+            }
             return vo;
         }).toList();
 

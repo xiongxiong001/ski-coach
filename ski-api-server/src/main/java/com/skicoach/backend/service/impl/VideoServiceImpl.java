@@ -143,7 +143,12 @@ public class VideoServiceImpl implements VideoService {
                 .orderByDesc(Video::getCreatedTime);
 
         if (query.getAnalysisStatus() != null && !query.getAnalysisStatus().isBlank()) {
-            wrapper.eq(Video::getAnalysisStatus, query.getAnalysisStatus());
+            // 当筛选"分析中"时,包含 pending 和 analyzing 两种状态
+            if ("analyzing".equals(query.getAnalysisStatus())) {
+                wrapper.in(Video::getAnalysisStatus, VideoStatusEnum.PENDING.getValue(), VideoStatusEnum.ANALYZING.getValue());
+            } else {
+                wrapper.eq(Video::getAnalysisStatus, query.getAnalysisStatus());
+            }
         }
 
         Page<Video> result = videoMapper.selectPage(page, wrapper);

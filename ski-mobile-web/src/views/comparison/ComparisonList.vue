@@ -1,8 +1,15 @@
 <template>
   <div class="page">
-    <header class="page-header">
-      <h2>对比报告</h2>
-      <p class="header-sub">{{ total ? `${total} 份对比报告` : '看到自己的进步' }}</p>
+    <!-- 顶部:背景渐变 -->
+    <header class="hero">
+      <div class="hero-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+      </div>
+      <div class="hero-content">
+        <h2>对比报告</h2>
+        <p class="header-sub">{{ total ? `${total} 份对比报告` : '看到自己的进步' }}</p>
+      </div>
     </header>
 
     <div class="content">
@@ -138,8 +145,40 @@ async function loadMore() {
   position: relative;
 }
 
-.page-header {
-  padding: calc(20px + #{$safe-top}) $space-lg $space-md;
+// ====== 顶部Hero ======
+.hero {
+  position: relative;
+  padding: calc(20px + #{$safe-top}) $space-lg $space-3xl;
+  overflow: hidden;
+  background: linear-gradient(180deg, #DBEAFE 0%, $bg-base 100%);
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(50px);
+  }
+  .orb-1 {
+    top: -60px; right: -40px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(139,92,246,0.5) 0%, transparent 70%);
+  }
+  .orb-2 {
+    top: 40px; left: -60px;
+    width: 180px; height: 180px;
+    background: radial-gradient(circle, rgba(59,130,246,0.4) 0%, transparent 70%);
+  }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
 
   h2 {
     font-size: $font-4xl;

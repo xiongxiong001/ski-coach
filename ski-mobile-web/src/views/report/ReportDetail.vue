@@ -16,15 +16,59 @@
       </button>
     </header>
 
+    <!-- 面包屑导航 -->
+    <div v-if="report && report.videoFilename" class="breadcrumb">
+      <span class="breadcrumb-label">来自：</span>
+      <button class="breadcrumb-link" @click="goVideo">
+        {{ report.videoFilename }}
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+          <path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+    </div>
+
     <div v-if="loading" class="loading-skeleton">
-      <div class="skeleton" style="height: 180px; margin-bottom: 16px; border-radius: 16px;"></div>
+      <div class="skeleton" style="height: 200px; margin-bottom: 16px; border-radius: 16px;"></div>
       <div class="skeleton" style="height: 28px; width: 60%; margin-bottom: 12px;"></div>
       <div class="skeleton" style="height: 16px; margin-bottom: 8px;"></div>
       <div class="skeleton" style="height: 16px; margin-bottom: 8px;"></div>
       <div class="skeleton" style="height: 16px; width: 80%;"></div>
     </div>
 
-    <div v-else-if="report" class="content">
+    <div v-else-if="report" class="content" :class="{ 'has-floating-video': isPlaying && showVideo }">
+      <!-- 可折叠视频播放器 -->
+      <div class="video-section">
+        <div class="video-header" @click="toggleVideo">
+          <div class="video-header-left">
+            <span class="video-icon">🎬</span>
+            <span class="video-title">回看视频</span>
+          </div>
+          <svg
+            class="expand-icon"
+            :class="{ expanded: showVideo }"
+            width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M19 9l-7 7-7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+
+        <div v-if="showVideo" class="video-player-wrap" :class="{ 'floating': isPlaying }">
+          <video
+            ref="videoRef"
+            class="video-player"
+            :src="videoUrl"
+            controls
+            preload="metadata"
+            playsinline
+            webkit-playsinline
+            @play="isPlaying = true"
+            @pause="isPlaying = false"
+            @ended="isPlaying = false"
+          >
+            您的浏览器不支持视频播放
+          </video>
+        </div>
+      </div>
+
       <!-- 报告头部 hero -->
       <div class="report-hero">
         <div class="hero-bg">
@@ -57,18 +101,29 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { showSuccessToast, showFailToast } from 'vant'
 import { getReport } from '@/api/report'
 import { formatDateTime } from '@/utils/format'
+import { useUserStore } from '@/stores/user'
 import MarkdownView from '@/components/MarkdownView.vue'
 
 const route = useRoute()
 const router = useRouter()
+const userStore = useUserStore()
 
 const report = ref(null)
 const loading = ref(false)
+const showVideo = ref(false)
+const videoRef = ref(null)
+const isPlaying = ref(false)
+
+// 视频播放地址
+const videoUrl = computed(() => {
+  if (!report.value?.videoId) return ''
+  return `/api/videos/${report.value.videoId}/stream?token=${userStore.token}`
+})
 
 onMounted(async () => {
   loading.value = true
@@ -78,6 +133,16 @@ onMounted(async () => {
     loading.value = false
   }
 })
+
+function toggleVideo() {
+  showVideo.value = !showVideo.value
+}
+
+function goVideo() {
+  if (report.value?.videoId) {
+    router.push(`/videos/${report.value.videoId}`)
+  }
+}
 
 async function handleShare() {
   // 简化版:复制当前页面链接
@@ -128,8 +193,107 @@ async function handleShare() {
   }
 }
 
+.breadcrumb {
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #FFFFFF;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+  .breadcrumb-label {
+    font-size: 11px;
+    color: #94A3B8;
+  }
+  .breadcrumb-link {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: #2563EB;
+    cursor: pointer;
+
+    &:active { opacity: 0.7; }
+  }
+}
+
 .content {
   padding: 0;
+
+  &.has-floating-video {
+    padding-top: calc(56.25vw + 60px);
+  }
+}
+
+.video-section {
+  margin: 12px 16px 0;
+  border-radius: 20px;
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.video-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  cursor: pointer;
+
+  &:active { background: #F1F5F9; }
+
+  .video-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .video-icon {
+    font-size: 18px;
+  }
+  .video-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: #1E293B;
+  }
+  .expand-icon {
+    color: #94A3B8;
+    transition: transform 0.2s;
+
+    &.expanded {
+      transform: rotate(180deg);
+    }
+  }
+}
+
+.video-player-wrap {
+  position: relative;
+  background: #000;
+
+  &.floating {
+    position: fixed;
+    top: calc(44px + #{$safe-top});
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: #000;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+
+    .video-player {
+      width: 100%;
+      aspect-ratio: 16/9;
+    }
+  }
+}
+
+.video-player {
+  width: 100%;
+  aspect-ratio: 16/9;
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 // ====== 报告 Hero ======

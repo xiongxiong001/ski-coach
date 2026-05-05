@@ -159,6 +159,9 @@ public class VideoController {
                 remaining -= read;
             }
             output.flush();
+        } catch (IOException e) {
+            // 客户端断开连接是正常情况,不记录错误日志
+            log.debug("视频流传输中断(客户端断开): videoId={}, userId={}", id, userId);
         }
     }
 }
