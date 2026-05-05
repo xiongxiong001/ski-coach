@@ -93,7 +93,7 @@ ski:
     access-key-secret: ${SMS_ACCESS_KEY_SECRET:}
     sign-name: ${SMS_SIGN_NAME:}
     template-code: ${SMS_TEMPLATE_CODE:}
-    send-enabled: ${SMS_SEND_ENABLED:true}   # 是否真实发送短信,开发环境可设为false
+    send-enabled: true   # 是否真实发送短信,开发环境可设为false
   worker:
     thread-count: ${SKI_WORKER_THREAD_COUNT:2}
 
