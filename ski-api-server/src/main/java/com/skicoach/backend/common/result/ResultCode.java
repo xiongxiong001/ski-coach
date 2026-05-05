@@ -55,6 +55,10 @@ public enum ResultCode {
     REPORT_NOT_FOUND(4301, "报告不存在"),
     COMPARISON_ALREADY_EXISTS(4302, "对比报告已存在"),
 
+    // 业务-反馈
+    FEEDBACK_NOT_FOUND(4401, "反馈不存在"),
+    FEEDBACK_IMAGE_TOO_MANY(4402, "图片数量超过限制"),
+
     // ============== 5xxx 服务端错误 ==============
     SYSTEM_ERROR(5000, "系统异常"),
     BUSINESS_ERROR(5001, "业务异常"),

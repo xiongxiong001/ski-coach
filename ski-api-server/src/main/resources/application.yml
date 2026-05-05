@@ -78,14 +78,6 @@ ski:
     allowed-extensions: mp4,mov,m4v
     max-file-size-mb: 50
 
-  # 阿里云短信(密钥通过环境变量注入,开发和生产的实际值在各自profile中配置)
-  sms:
-    access-key-id: ${SMS_ACCESS_KEY_ID:}
-    access-key-secret: ${SMS_ACCESS_KEY_SECRET:}
-    sign-name: ${SMS_SIGN_NAME:}
-    template-code: ${SMS_TEMPLATE_CODE:}
-    send-enabled: ${SMS_SEND_ENABLED:true}   # 是否真实发送短信,开发环境可设为false
-
   # 任务队列
   worker:
     thread-count: 2                # 后台任务消费线程数

@@ -45,6 +45,17 @@
       </div>
 
       <div class="menu-card">
+        <div class="menu-item" @click="router.push('/feedback')">
+          <div class="menu-icon thumb-green">💬</div>
+          <div class="menu-info">
+            <div class="menu-title">用户反馈</div>
+            <div class="menu-desc">帮助我们做得更好</div>
+          </div>
+          <div class="menu-arrow">›</div>
+        </div>
+      </div>
+
+      <div class="menu-card">
         <div class="menu-item" @click="showAbout">
           <div class="menu-icon thumb-cyan">ℹ️</div>
           <div class="menu-info">
@@ -276,6 +287,7 @@ async function handleLogout() {
   &.thumb-blue { background: linear-gradient(135deg, #3B82F6, #1e40af); }
   &.thumb-purple { background: linear-gradient(135deg, #8B5CF6, #6d28d9); }
   &.thumb-cyan { background: linear-gradient(135deg, #06B6D4, #0e7490); }
+  &.thumb-green { background: linear-gradient(135deg, #10B981, #047857); }
 }
 
 .menu-info {

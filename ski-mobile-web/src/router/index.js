@@ -81,6 +81,26 @@ const routes = [
     meta: { requiresAuth: true, title: '对比报告', noTab: true }
   },
 
+  // 用户反馈
+  {
+    path: '/feedback',
+    name: 'FeedbackCreate',
+    component: () => import('@/views/feedback/FeedbackCreate.vue'),
+    meta: { requiresAuth: true, title: '用户反馈', noTab: true }
+  },
+  {
+    path: '/feedback/list',
+    name: 'FeedbackList',
+    component: () => import('@/views/feedback/FeedbackList.vue'),
+    meta: { requiresAuth: true, title: '我的反馈', noTab: true }
+  },
+  {
+    path: '/feedback/:id',
+    name: 'FeedbackDetail',
+    component: () => import('@/views/feedback/FeedbackDetail.vue'),
+    meta: { requiresAuth: true, title: '反馈详情', noTab: true }
+  },
+
   { path: '/:pathMatch(.*)*', redirect: '/' }
 ]
 
