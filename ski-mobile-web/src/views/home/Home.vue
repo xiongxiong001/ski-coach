@@ -79,10 +79,9 @@
         >
           <!-- 视频缩略图占位 -->
           <div class="report-thumb" :class="`thumb-${r.videoId % 5}`">
-            <div class="thumb-icon">⛷️</div>
-            <div v-if="r.videoDurationSeconds" class="duration-badge">
-              {{ formatDuration(r.videoDurationSeconds) }}
-            </div>
+            <div class="report-icon-wrap">
+            <div class="report-icon">📄</div>
+          </div>
           </div>
           <div class="report-info">
             <div class="report-title">{{ r.videoFilename || 'AI 教练点评' }}</div>
@@ -362,6 +361,17 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: $space-md;
+}
+
+.report-icon-wrap {
+width: 44px;
+height: 44px;
+background: $gradient-warm;
+border-radius: $radius-md;
+display: flex;
+align-items: center;
+justify-content: center;
+flex-shrink: 0;
 }
 
 .report-card {
