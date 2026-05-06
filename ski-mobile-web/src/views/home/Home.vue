@@ -172,6 +172,9 @@ onMounted(async () => {
   padding: calc(20px + #{$safe-top}) $space-lg $space-3xl;
   overflow: hidden;
   background: linear-gradient(180deg, #DBEAFE 0%, $bg-base 100%);
+  // 确保背景延伸到安全区域顶部
+  margin-top: calc(0px - #{$safe-top});
+  padding-top: calc(20px + #{$safe-top} + #{$safe-top});
 }
 
 .hero-bg {
