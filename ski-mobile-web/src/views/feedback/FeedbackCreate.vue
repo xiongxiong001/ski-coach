@@ -14,7 +14,7 @@
     <div class="guide-banner">
       <div class="guide-card">
         <div class="guide-emoji">👋</div>
-        <div class="guide-text">告诉我们你的想法，每条反馈我们都会亲自看——<br>平均回复时长<span class="highlight"> 4 小时</span></div>
+        <div class="guide-text">告诉我们你的想法，每条反馈我们都会亲自看——<br>并在最快的时间内回复</div>
       </div>
     </div>
 
