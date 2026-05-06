@@ -30,9 +30,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * 视频接口
@@ -90,78 +95,135 @@ public class VideoController {
         return ApiResult.success();
     }
 
-    @Operation(summary = "视频流播放", description = "流式播放视频文件,支持 Range 请求(拖动进度条)。通过 ?token= 参数鉴权(<video>标签无法发送自定义Header)")
+
+    // 缓冲区大小: 64KB（视频流最优值）
+    private static final int BUFFER_SIZE = 64 * 1024;
+
+    @Operation(summary = "视频流播放", description = "流式播放视频文件,支持 Range 请求(拖动进度条)。通过 ?token= 参数鉴权")
     @GetMapping("/{id}/stream")
     public void stream(
             @PathVariable("id") Long id,
             @RequestParam("token") String token,
             HttpServletRequest request,
-            HttpServletResponse response) throws IOException {
-
-        Long userId = jwtUtil.parseUserToken(token);   // 手动解析JWT(不走拦截器)
+            HttpServletResponse response) {
+        log.info("视频流播放: id={}, token={}", id, token);
+        // 1. 鉴权
+        Long userId = jwtUtil.parseUserToken(token);
         Video video = videoService.getOwnedVideoOrThrow(userId, id);
 
+        // 2. 获取文件路径
         String absolutePath = fileStorageService.resolveAbsolutePath(video.getFilePath());
-        Path path = Path.of(absolutePath);
+        Path filePath = Path.of(absolutePath);
 
-        if (!Files.exists(path)) {
+        if (!Files.exists(filePath)) {
             throw new BusinessException(ResultCode.VIDEO_NOT_FOUND, "视频文件不存在");
         }
 
-        long fileSize = Files.size(path);
-        String contentType = Files.probeContentType(path);
-        if (contentType == null) {
-            contentType = "video/mp4";
-        }
-
-        response.setHeader("Accept-Ranges", "bytes");
-        response.setContentType(contentType);
-
-        String rangeHeader = request.getHeader("Range");
-
-        if (rangeHeader == null || !rangeHeader.startsWith("bytes=")) {
-            response.setContentLengthLong(fileSize);
-            Files.copy(path, response.getOutputStream());
-            response.getOutputStream().flush();
-            return;
-        }
-
-        // 解析 Range: "bytes=0-1023" 或 "bytes=1024-"
-        String rangeValue = rangeHeader.substring(6);
-        String[] parts = rangeValue.split("-");
-        long start = Long.parseLong(parts[0]);
-        long end = (parts.length > 1 && !parts[1].isEmpty())
-                ? Long.parseLong(parts[1])
-                : fileSize - 1;
-
-        if (start >= fileSize || end >= fileSize || start > end) {
-            response.setStatus(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
-            response.setHeader("Content-Range", "bytes */" + fileSize);
-            return;
-        }
-
-        long rangeLength = end - start + 1;
-
-        response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
-        response.setHeader("Content-Range", "bytes " + start + "-" + end + "/" + fileSize);
-        response.setContentLengthLong(rangeLength);
-
-        try (var input = Files.newInputStream(path);
-             var output = response.getOutputStream()) {
-            input.skip(start);
-            byte[] buffer = new byte[8192];
-            long remaining = rangeLength;
-            while (remaining > 0) {
-                int len = (int) Math.min(buffer.length, remaining);
-                int read = input.read(buffer, 0, len);
-                if (read == -1) break;
-                output.write(buffer, 0, read);
-                remaining -= read;
+        try {
+            long fileSize = Files.size(filePath);
+            String contentType = Files.probeContentType(filePath);
+            if (contentType == null) {
+                contentType = "video/mp4";
             }
-            output.flush();
+
+            // 3. 生成 ETag（文件大小 + 修改时间）
+            String eTag = generateETag(fileSize, Files.getLastModifiedTime(filePath).toMillis());
+
+            // 4. 基础响应头
+            response.setHeader("Accept-Ranges", "bytes");
+            response.setContentType(contentType);
+            response.setHeader("ETag", eTag);
+            response.setHeader("Cache-Control", "public, max-age=3600");
+            response.setHeader("Content-Disposition", "inline; filename=\"" + video.getOriginalFilename() + "\"");
+
+            // 5. 缓存命中直接返回 304
+            String ifNoneMatch = request.getHeader("If-None-Match");
+            if (ifNoneMatch != null && ifNoneMatch.equals(eTag)) {
+                response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                return;
+            }
+
+            String rangeHeader = request.getHeader("Range");
+
+            // 6. 无 Range → 全量返回
+            if (rangeHeader == null || !rangeHeader.startsWith("bytes=")) {
+                response.setContentLengthLong(fileSize);
+                try (BufferedInputStream bis = new BufferedInputStream(Files.newInputStream(filePath), BUFFER_SIZE);
+                     OutputStream os = response.getOutputStream()) {
+
+                    byte[] buffer = new byte[BUFFER_SIZE];
+                    int len;
+                    while ((len = bis.read(buffer)) != -1) {
+                        os.write(buffer, 0, len);
+                    }
+                    os.flush();
+                }
+                return;
+            }
+
+            // 7. 解析 Range：bytes=start-end
+            String range = rangeHeader.substring(6);
+            String[] split = range.split("-");
+            long start = Long.parseLong(split[0]);
+            long end = (split.length > 1 && !split[1].isEmpty()) ? Long.parseLong(split[1]) : fileSize - 1;
+
+            // 范围非法 → 416
+            if (end >= fileSize || start > end) {
+                response.setStatus(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
+                response.setHeader("Content-Range", "bytes */" + fileSize);
+                return;
+            }
+
+            long contentLength = end - start + 1;
+
+            // 8. 分段响应 206
+            response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+            response.setHeader("Content-Range", "bytes " + start + "-" + end + "/" + fileSize);
+            response.setContentLengthLong(contentLength);
+
+            // 9. 随机读取文件（支持大文件、低内存）
+            try (RandomAccessFile raf = new RandomAccessFile(absolutePath, "r");
+                 OutputStream os = response.getOutputStream()) {
+
+                raf.seek(start);
+                byte[] buffer = new byte[BUFFER_SIZE];
+                long remain = contentLength;
+
+                while (remain > 0) {
+                    int readLen = (int) Math.min(BUFFER_SIZE, remain);
+                    int read = raf.read(buffer, 0, readLen);
+                    if (read == -1) break;
+
+                    os.write(buffer, 0, read);
+                    remain -= read;
+                }
+                os.flush();
+            }
+
         } catch (IOException e) {
-            // 客户端断开连接是正常情况,不记录错误日志
-            log.debug("视频流传输中断(客户端断开): videoId={}, userId={}", id, userId);
+            // 客户端断开连接属于正常行为，只打 debug 日志
+            log.debug("视频流传输中断：videoId={}, userId={}, 异常信息：{}", id, userId, e.getMessage());
+        } catch (Exception e) {
+            log.error("视频流播放异常：videoId={}, userId={}", id, userId, e);
+            throw new BusinessException(ResultCode.SYSTEM_ERROR, "视频播放失败");
+        }
+    }
+
+    /**
+     * 生成 ETag（MD5 保证唯一）
+     */
+    private String generateETag(long fileSize, long lastModified) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(String.valueOf(fileSize).getBytes());
+            md.update(String.valueOf(lastModified).getBytes());
+            StringBuilder sb = new StringBuilder();
+            for (byte b : md.digest()) {
+                sb.append(String.format("%02x", b));
+            }
+            return "\"" + sb + "\"";
+        } catch (NoSuchAlgorithmException e) {
+            return "\"" + fileSize + "-" + lastModified + "\"";
         }
     }
 }
