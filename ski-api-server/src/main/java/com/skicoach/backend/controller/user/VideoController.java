@@ -21,6 +21,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -60,6 +61,9 @@ public class VideoController {
     private final VideoService videoService;
     private final FileStorageService fileStorageService;
     private final JwtUtil jwtUtil;
+
+    @Value("${video.use-nginx:false}")
+    private boolean useNginx;
 
     @Operation(summary = "上传视频", description = "上传滑雪视频,支持MD5秒传。文件最大100MB,允许mp4/mov/m4v")
     @PostMapping("/upload")
@@ -110,9 +114,16 @@ public class VideoController {
         // 1. 鉴权
         Long userId = jwtUtil.parseUserToken(token);
         Video video = videoService.getOwnedVideoOrThrow(userId, id);
-
+        String dbFilePath = video.getFilePath();
+        // 【线上环境】用 Nginx 高性能传输
+        if (useNginx) {
+            log.info("use nginx to stream video {}", id);
+            response.setHeader("X-Accel-Redirect", "/api/video_files/" + dbFilePath);
+            response.setContentType("video/mp4");
+            return;
+        }
         // 2. 获取文件路径
-        String absolutePath = fileStorageService.resolveAbsolutePath(video.getFilePath());
+        String absolutePath = fileStorageService.resolveAbsolutePath(dbFilePath);
         Path filePath = Path.of(absolutePath);
 
         if (!Files.exists(filePath)) {

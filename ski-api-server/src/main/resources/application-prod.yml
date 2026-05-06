@@ -132,3 +132,6 @@ management:
   endpoint:
     health:
       show-details: never
+
+video:
+  use-nginx: true
