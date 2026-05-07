@@ -122,6 +122,7 @@ public class VideoController {
             response.setContentType("video/mp4");
             return;
         }
+        log.info("run this way");
         // 2. 获取文件路径
         String absolutePath = fileStorageService.resolveAbsolutePath(dbFilePath);
         Path filePath = Path.of(absolutePath);
